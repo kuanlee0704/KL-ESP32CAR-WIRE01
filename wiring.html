@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="zh-Hant"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>RC4WD 4WD 3D 接線圖</title>
+<style>
+:root{--bg:#eef0f4;--pn:#fff;--tx:#1b2130;--mu:#697386;--bd:#d6dbe4;--ac:#2b6cff;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f131b;--pn:#181e29;--tx:#e6e9f0;--mu:#8f9ab0;--bd:#2b3344;--ac:#6b9bff;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0f131b;--pn:#181e29;--tx:#e6e9f0;--mu:#8f9ab0;--bd:#2b3344;--ac:#6b9bff;color-scheme:dark}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--tx);font:14px/1.45 "Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif}
+#app{display:flex;height:100%}
+#stage{flex:1;position:relative;min-width:0}
+#cv{width:100%;height:100%;display:block;touch-action:none;cursor:grab}
+aside{width:310px;background:var(--pn);border-left:1px solid var(--bd);overflow:auto;padding:14px;display:flex;flex-direction:column;gap:12px}
+h1{font-size:17px;margin:0}
+.mu{color:var(--mu);font-size:12.5px;margin:4px 0 0}
+label.g{display:flex;align-items:center;gap:8px;padding:3px 0;cursor:pointer}
+label.g i{width:22px;height:5px;border-radius:3px;flex:none}
+label.g span{flex:1}label.g small{color:var(--mu)}
+.btns{display:flex;flex-wrap:wrap;gap:6px}
+button{font:inherit;font-size:12.5px;color:var(--tx);background:transparent;border:1px solid var(--bd);border-radius:6px;padding:4px 9px;cursor:pointer}
+button:hover,button.on{border-color:var(--ac);color:var(--ac)}
+#info{font-size:13px;padding:8px 10px;border:1px solid var(--bd);border-radius:6px}
+#list{display:flex;flex-direction:column}
+.r{display:flex;gap:8px;align-items:flex-start;padding:5px 2px;border-top:1px solid var(--bd);cursor:pointer;font-size:12.5px}
+.r:hover{background:color-mix(in srgb,var(--ac) 10%,transparent)}
+.r i{min-width:4px;align-self:stretch;border-radius:3px;flex:none;color:#fff;font:600 11px/1 system-ui;display:flex;align-items:center;justify-content:center;padding:0 4px}
+.r small{color:var(--mu);display:block}
+#tip{position:absolute;pointer-events:none;background:#141824;color:#fff;font-size:12px;padding:5px 8px;border-radius:6px;display:none;max-width:260px;z-index:3}
+@media(max-width:760px){#app{flex-direction:column}aside{width:auto;height:46%;border-left:0;border-top:1px solid var(--bd)}}
+</style></head><body>
+<div id="app"><div id="stage"><canvas id="cv"></canvas><div id="tip"></div></div>
+<aside>
+<div><h1>RC4WD 4WD 接線圖</h1>
+<p class="mu">拖曳旋轉・按住 Ctrl 拖曳、右鍵或雙指平移・滾輪縮放・空白鍵回中央。點元件或線可聚焦，點空白處取消。要改線就把需求告訴 Claude，例如「FL 編碼器改接 GP20」。</p></div>
+<div id="grp"></div>
+<div class="btns" id="pre"></div>
+<div class="btns"><button id="bLab" class="on">針腳標籤</button><button id="bTop">俯視</button><button id="bIso">斜視</button></div>
+<div id="info"></div><div id="list"></div>
+</aside></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+/* ===================== 資料區：改線只動這裡 =====================
+ 座標單位≈公分的示意比例；x 向右、z 向車尾，車頭在 -z。
+ 元件 pins 的 "id|顯示名" ；線 w(起點,終點,線組,備註,顏色?) 起訖格式 元件.針腳 */
+const G={ // 線組：[顏色,粗細,名稱,預設顯示]
+ VM:['#ff3b30',.26,'電池 VM（12V）',1],V5:['#ff9500',.2,'5V',1],V33:['#ffd60a',.16,'3V3',1],GND:['#9aa3b2',.14,'GND 共地',0],
+ PWM:['#2f81ff',.14,'馬達控制 PWM/IN',1],MOT:['#ff453a',.18,'馬達線（紅/白）',1],ENC:['#30d158',.14,'編碼器 A 相',1],
+ TRG:['#40c8e0',.14,'超音波 Trig',1],ECH:['#bf5af2',.14,'超音波 Echo（經分壓）',1],UART:['#ff2d95',.16,'UART 對接',1],I2C:['#7ee787',.14,'I2C 電量計（INA219）',1],SD:['#00d4aa',.14,'microSD 記憶卡（SD_MMC 1-bit）',1],
+ PAS:['#ffb86b',.12,'被動元件（電阻/電容）',1]};
+const LP=['GP0','GP1','GND','GP2','GP3','GP4','GP5','GND','GP6','GP7','GP8','GP9','GND','GP10','GP11','GP12','GP13','GND','GP14','GP15'];
+const RP=['VBUS','VSYS','GND','3V3_EN','3V3','ADC_VREF','GP28','GND','GP27','GP26','RUN','GP22','GND','GP21','GP20','GP19','GP18','GND','GP17','GP16'];
+const pp=(a,left)=>a.map((n,i)=>{const p=left?i+1:40-i;return(n=='GND'?n+p:n)+'|'+n+'·'+p});
+const C=[
+ {id:'PICO',name:'Pico RP2040',x:0,z:0,w:6,h:.8,d:20,col:'#2e8b57',pins:{L:pp(LP,1),R:pp(RP,0)}},
+ {id:'ESP',name:'ESP32-S3',x:0,z:-20,w:18,h:1,d:12,col:'#37474f',p:1.7,pins:{B:['5V','GND','TX|GPIO1 TX','RX|GPIO2 RX','3V3','SDA|GPIO41 SDA','SCL|GPIO42 SCL','SDCLK|GPIO39 SD_CLK','SDCMD|GPIO38 SD_CMD','SDD0|GPIO40 SD_D0']}},
+ {id:'SD',name:'microSD（ESP32-S3 板載插槽）',x:-17,z:-11,w:7,h:1,d:3,col:'#00695c',p:2,pins:{R:['CLK','CMD','D0']}},
+ {id:'INA',name:'INA219 電量計',x:22,z:-12,w:8,h:1,d:5,col:'#6a1b9a',pins:{L:['VCC','GND','SDA','SCL'],R:['VIN-|VIN− 接電池+']}},
+ {id:'BATT',name:'3S 電池',x:-40,z:8,w:7,h:4,d:14,col:'#e0a100',p:2,pins:{R:['+','-|−']}},
+ {id:'SWF',name:'開關+保險絲',x:-29,z:8,w:6,h:1.2,d:5,col:'#8d6e63',pins:{L:['IN'],R:['OUT']}},
+ {id:'PB',name:'5V 行動電源',x:40,z:8,w:7,h:4,d:14,col:'#6d4c41',p:2,pins:{L:['5V','GND']}},
+ {id:'D1',name:'1N5819',x:7,z:7.5,w:4,h:1,d:2,col:'#546e7a',pins:{L:['A|A 陽極'],R:['K|K 陰極']}},
+ {id:'VM',bus:1,name:'VM 匯流',x:-25,z:15,col:'#ff3b30'},{id:'GND',bus:1,name:'GND 匯流',x:0,z:12,col:'#78818f'},
+ {id:'V33',bus:1,name:'3V3 匯流',x:0,z:17.5,col:'#e6b800'},{id:'V5',bus:1,name:'5V 匯流',x:9,z:22.5,col:'#ff9500'}];
+const tb=(id,nm,x,inn,out)=>C.push({id,name:nm,x,z:-2,w:6,h:1,d:9,col:'#c0392b',pins:{[inn]:['PWMA','AIN1','AIN2','PWMB','BIN1','BIN2','STBY','VCC'],[out]:['AO1','AO2','BO1','BO2','VM','GND']}});
+tb('TB1','TB6612 #1 左側',-16,'R','L');tb('TB2','TB6612 #2 右側',16,'L','R');
+// 每輪：驅動板/通道、[PWM,IN1,IN2]、編碼器A相、[Trig,Echo]、馬達位置/針腳側、超音波位置/針腳側
+const WH={FL:{tb:'TB1',ch:'A',m:[0,1,2],e:12,s:[13,15],x:-31,z:-22,ms:'R',sx:-12,sz:-33,sb:'B'},
+ RL:{tb:'TB1',ch:'B',m:[3,4,5],e:16,s:[22,26],x:-31,z:22,ms:'R',sx:-12,sz:33,sb:'F'},
+ FR:{tb:'TB2',ch:'A',m:[6,7,8],e:14,s:[17,19],x:31,z:-22,ms:'L',sx:12,sz:-33,sb:'B'},
+ RR:{tb:'TB2',ch:'B',m:[9,10,11],e:18,s:[27,28],x:31,z:22,ms:'L',sx:12,sz:33,sb:'F'}};
+const W=[],w=(a,b,g,n,c)=>W.push({a,b,g,n:n||'',c});
+for(const k in WH){const o=WH[k],A=o.ch,P=[A=='A'?'PWMA':'PWMB',A+'IN1'.replace('AIN1',A=='A'?'AIN1':'BIN1'),A=='A'?'AIN2':'BIN2'];
+ C.push({id:k,name:k+' 馬達 GA25',x:o.x,z:o.z,w:9,h:4,d:7,col:'#455a64',pins:{[o.ms]:['M+|紅 M+','M-|白 M−','VCC|藍 VCC','GND|黑 GND','A|黃 A','B|綠 B（不接）']}});
+ C.push({id:'S'+k,name:k+' 超音波',x:o.sx,z:o.sz,w:9,h:1.6,d:3,col:'#1565c0',p:2,pins:{[o.sb]:['VCC','Trig','Echo','GND']}});
+ C.push({id:'D'+k,name:k+' Echo 分壓 R1 1kΩ+R2 2kΩ',x:o.sx,z:o.sz+(o.sz<0?7:-7),w:5,h:.8,d:2,col:'#795548',pins:{L:['IN|Echo 5V'],R:['OUT|→Pico'],B:['GND|R2 2k(2×1k)→GND']}});
+ w(`PICO.GP${o.m[0]}`,`${o.tb}.${P[0]}`,'PWM','PWM 20kHz');w(`PICO.GP${o.m[1]}`,`${o.tb}.${P[1]}`,'PWM','IN1');w(`PICO.GP${o.m[2]}`,`${o.tb}.${P[2]}`,'PWM','IN2');
+ w(`${o.tb}.${A}O1`,`${k}.M+`,'MOT','紅線','#ff453a');w(`${o.tb}.${A}O2`,`${k}.M-`,'MOT','白線','#f2f2f7');
+ w(`${k}.A`,`PICO.GP${o.e}`,'ENC','黃線 A 相；B 相不接');w(`V33.E${k}`,`${k}.VCC`,'V33','編碼器 3.3V');w(`${k}.GND`,`GND.E${k}`,'GND');
+ w(`PICO.GP${o.s[0]}`,`S${k}.Trig`,'TRG');w(`S${k}.Echo`,`D${k}.IN`,'ECH','Echo 為 5V，先分壓');w(`D${k}.OUT`,`PICO.GP${o.s[1]}`,'ECH','分壓後約 3.3V');
+ w(`D${k}.GND`,`GND.D${k}`,'GND','R2 = 2 顆 1kΩ 串聯 → GND');w(`V5.S${k}`,`S${k}.VCC`,'V5');w(`S${k}.GND`,`GND.S${k}`,'GND');
+ // ---- 被動元件（並聯在既有線路上，線組 PAS；不佔用針腳）----
+ C.push({id:'CM'+k,name:k+' 馬達電容 0.1µF',x:o.x<0?o.x-9:o.x+9,z:o.z,w:2.4,h:1.2,d:4,col:'#d9a441',pins:{[o.ms=='R'?'L':'R']:['1|M+','2|M−']},p:2.2});
+ C.push({id:'RD'+k,name:k+' 下拉 10kΩ×3',x:o.x<0?o.x-9:o.x+9,z:o.z+(o.z<0?-8:8),w:2.4,h:1,d:7,col:'#c2b280',pins:{[o.ms=='R'?'L':'R']:['1|PWM','2|IN1','3|IN2','G|GND']},p:1.6});
+ C.push({id:'RE'+k,name:k+' 編碼器上拉 4.7kΩ(選用)',x:o.x<0?o.x-9:o.x+9,z:o.z+(o.z<0?8:15),w:2.4,h:1,d:4,col:'#c2b280',pins:{[o.ms=='R'?'L':'R']:['1|→A 線','2|→3V3']},p:2.2});
+ w(`CM${k}.1`,`${k}.M+`,'PAS','並聯在馬達 M+/M− 端子，越近越好');w(`CM${k}.2`,`${k}.M-`,'PAS');
+ w(`RD${k}.1`,`${o.tb}.${P[0]}`,'PAS','10k 下拉到 GND（重啟瞬間不亂轉）');w(`RD${k}.2`,`${o.tb}.${P[1]}`,'PAS');w(`RD${k}.3`,`${o.tb}.${P[2]}`,'PAS');w(`RD${k}.G`,`GND.RD${k}`,'GND');
+ w(`RE${k}.1`,`${k}.A`,'PAS','選用：A 線邊緣圓鈍時再加；Pico 已開內部上拉');w(`RE${k}.2`,`V33.RE${k}`,'V33');}
+for(const t of['TB1','TB2']){w(`V33.${t}V`,`${t}.VCC`,'V33');w(`V33.${t}S`,`${t}.STBY`,'V33','STBY 接 3V3 常開');w(`VM.${t}`,`${t}.VM`,'VM','VM 旁並 1000µF');w(`${t}.GND`,`GND.${t}`,'GND');
+ C.push({id:'CT'+t,name:t+' 電解電容 1000µF/25V',x:t=='TB1'?-16:16,z:7,w:3.6,h:3,d:3.6,col:'#1a237e',pins:{L:['+'],R:['-|−']},p:1});
+ w(`VM.CT${t}`,`CT${t}.+`,'VM','電容 + 接 VM（靠近驅動板，注意極性）');w(`CT${t}.-`,`GND.CT${t}`,'GND','電容 − 接 GND（長腳為 +）')}
+w('BATT.+','SWF.IN','VM','電池 + → XT60');w('SWF.OUT','VM.SW','VM','保險絲 5~7.5A');w('BATT.-','GND.BATT','GND');
+w('PB.5V','V5.PB','V5');w('PB.GND','GND.PB','GND');w('V5.ESP','ESP.5V','V5');w('V5.D','D1.A','V5');
+w('D1.K','PICO.VSYS','V5','肖特基 → VSYS（不接 VBUS）');w('PICO.3V3','V33.PICO','V33','3V3(OUT) 供板子/編碼器');
+w('PICO.GND3','GND.PICO','GND');w('ESP.GND','GND.ESP','GND');
+w('ESP.3V3','INA.VCC','V33','ESP32 3V3 → INA219 VCC');w('ESP.SDA','INA.SDA','I2C','I2C SDA = GPIO41');w('ESP.SCL','INA.SCL','I2C','I2C SCL = GPIO42');
+w('INA.GND','GND.INA','GND');w('VM.INA','INA.VIN-','VM','電池+（開關/保險絲之後）→ VIN−：只量電壓，VIN+ 不接、不串聯負載');
+w('ESP.SDCLK','SD.CLK','SD','SD_CLK = GPIO39（板載插槽已接好，只是畫出來）');w('ESP.SDCMD','SD.CMD','SD','SD_CMD = GPIO38');w('ESP.SDD0','SD.D0','SD','SD_D0 = GPIO40（1-bit 模式只用 D0）');
+w('PICO.GP20','ESP.RX','UART','Pico TX → ESP RX（UART1）');w('PICO.GP21','ESP.TX','UART','Pico RX ← ESP TX');
+/* ===================== 以下為渲染程式 ===================== */
+const cv=document.getElementById('cv'),R=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:true});
+R.setPixelRatio(Math.min(devicePixelRatio,2));
+const S=new THREE.Scene(),cam=new THREE.PerspectiveCamera(42,1,.5,700);
+S.add(new THREE.AmbientLight(0xffffff,.8));const dl=new THREE.DirectionalLight(0xffffff,.6);dl.position.set(30,70,25);S.add(dl);
+let az=.45,el=.85,dist=135,tg=new THREE.Vector3(0,0,0);const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+function setCam(){cam.position.set(tg.x+dist*Math.cos(el)*Math.sin(az),dist*Math.sin(el),tg.z+dist*Math.cos(el)*Math.cos(az));cam.lookAt(tg)}
+function spr(t,fs,sc,bg){const c=document.createElement('canvas'),x=c.getContext('2d');x.font=`600 ${fs}px sans-serif`;
+ const wd=Math.ceil(x.measureText(t).width)+20,h=fs+16;c.width=wd;c.height=h;x.font=`600 ${fs}px sans-serif`;
+ x.fillStyle=bg||'rgba(18,22,32,.85)';x.beginPath();x.roundRect?x.roundRect(0,0,wd,h,10):x.rect(0,0,wd,h);x.fill();
+ x.fillStyle='#fff';x.textBaseline='middle';x.fillText(t,10,h/2+2);
+ const tx=new THREE.CanvasTexture(c);tx.minFilter=THREE.LinearFilter;
+ const s=new THREE.Sprite(new THREE.SpriteMaterial({map:tx,depthTest:false,transparent:true}));s.scale.set(wd*sc,h*sc,1);s.renderOrder=10;return s}
+const ref=r=>{const i=r.indexOf('.');return[r.slice(0,i),r.slice(i+1)]},CM={};C.forEach(c=>CM[c.id]=c);
+W.forEach(o=>[o.a,o.b].forEach(r=>{const[i,p]=ref(r),c=CM[i];if(!c)throw Error('找不到元件 '+i);if(c.bus){c.taps=c.taps||[];if(!c.taps.includes(p))c.taps.push(p)}}));
+C.filter(c=>c.bus).forEach(c=>{c.w=(c.taps||[]).length*1.2+1.2;c.h=1;c.d=1.8});
+const pos={},plab={},used={};W.forEach(o=>[o.a,o.b].forEach(r=>used[r]=used[r]||o.g));
+const plate=new THREE.Mesh(new THREE.BoxGeometry(108,1,86),new THREE.MeshLambertMaterial({color:0x8a94a6,transparent:true,opacity:.28}));plate.position.y=-.6;S.add(plate);
+const ar=spr('▲ 車頭',56,.035,'rgba(43,108,255,.9)');ar.position.set(0,.5,-40);S.add(ar);
+const picks=[];
+C.forEach(c=>{const g=new THREE.Group();g.position.set(c.x,0,c.z);S.add(g);
+ const m=new THREE.Mesh(new THREE.BoxGeometry(c.w,c.h,c.d),new THREE.MeshLambertMaterial({color:c.col}));m.position.y=c.h/2;m.userData.cid=c.id;g.add(m);picks.push(m);
+ const nm=spr(c.name,50,.028);nm.position.set(0,c.h+(c.bus?2.2:3.2),c.bus?-1.6:0);g.add(nm);
+ const lst=[];
+ if(c.bus)(c.taps||[]).forEach((t,i)=>lst.push({id:t,l:'',x:-((c.taps.length-1)*.6)+i*1.2,z:0,s:'T'}));
+ else for(const s in c.pins){const a=c.pins[s],n=a.length,p=c.p||1;a.forEach((q,i)=>{const[id,l]=q.split('|'),o=(i-(n-1)/2)*p;
+  lst.push({id,l:l||id,s,i,x:s=='L'?-c.w/2+.6:s=='R'?c.w/2-.6:o,z:s=='F'?-c.d/2+.6:s=='B'?c.d/2-.6:o})})}
+ lst.forEach(q=>{const k=c.id+'.'+q.id,on=used[k];plab[k]=q.l;
+  const d=new THREE.Mesh(new THREE.SphereGeometry(on?.3:.17,10,8),new THREE.MeshLambertMaterial({color:on?G[on][0]:0x9aa3b2}));
+  d.position.set(q.x,c.h,q.z);g.add(d);pos[k]=new THREE.Vector3(c.x+q.x,c.h,c.z+q.z);
+  if(on&&q.l&&q.s!='T'){const t=spr(q.l,40,.011);t.userData.pl=1;const hw=t.scale.x/2+.5;
+   if(q.s=='L')t.position.set(q.x-hw,c.h+.2,q.z);else if(q.s=='R')t.position.set(q.x+hw,c.h+.2,q.z);
+   else t.position.set(q.x,c.h+1+(q.i%2)*.8,q.z+(q.s=='F'?-.6:.6));g.add(t)}})});
+function rp(p,r){const q=[p[0]];p.forEach(v=>{if(v.distanceTo(q[q.length-1])>.01)q.push(v)});const cp=new THREE.CurvePath();let s=q[0];
+ const ln=(a,b)=>{if(a.distanceTo(b)>.005)cp.add(new THREE.LineCurve3(a,b))};
+ for(let i=1;i<q.length-1;i++){const a=q[i-1],b=q[i],c=q[i+1],d1=b.distanceTo(a),d2=b.distanceTo(c),rr=Math.min(r,d1/2,d2/2),e1=b.clone().lerp(a,rr/d1),e2=b.clone().lerp(c,rr/d2);
+  ln(s,e1);cp.add(new THREE.QuadraticBezierCurve3(e1,b,e2));s=e2}
+ ln(s,q[q.length-1]);return cp}
+const WR=[],wm=[];
+W.forEach((o,k)=>{const a=pos[o.a],b=pos[o.b];if(!a||!b)throw Error('找不到針腳 '+o.a+' 或 '+o.b);
+ const H=5.4+(k%9)*.4,V=(x,z)=>new THREE.Vector3(x,H,z),jx=(a.x+b.x)/2+((k%7)-3)*.55;
+ const cu=rp([a,V(a.x,a.z),V(jx,a.z),V(jx,b.z),V(b.x,b.z),b],.9),gg=G[o.g];
+ const m=new THREE.Mesh(new THREE.TubeGeometry(cu,160,gg[1],6),new THREE.MeshLambertMaterial({color:o.c||gg[0],transparent:true}));
+ const r=o.o={m,ca:ref(o.a)[0],cb:ref(o.b)[0]};m.userData.w=o;S.add(m);WR.push(o);wm.push(m)});
+const nmOf=r=>{const[i,p]=ref(r),c=CM[i];return c.name+(plab[r]?' '+plab[r]:'')};
+const PAL=['#e6194b','#2e9e44','#3d5fd8','#f58231','#911eb4','#0a9d9d','#b38f00','#e03cc8','#7a5230','#5f7a00','#d1495b','#00798c'];
+let sel=null,labOn=true,tags=[],hov=null;
+function applyHov(){WR.forEach(o=>{const m=o.o.m.material;m.emissive.setHex(hov===o?0xaaaaaa:(sel&&o.num?0x333333:0));if(sel&&sel.t=='c'&&o.num)m.opacity=hov&&hov!==o?.2:1})}
+function refresh(){let n=0;const rows=[];
+ WR.forEach(o=>{const on=G[o.g][3],hit=!sel||(sel.t=='c'?(o.o.ca==sel.id||o.o.cb==sel.id):sel.w===o);
+  o.o.m.visible=on;o.num=(sel&&sel.t=='c'&&hit&&on)?rows.length+1:0;const mt=o.o.m.material;mt.color.set(o.num?PAL[(o.num-1)%PAL.length]:(o.c||G[o.g][0]));mt.opacity=hit?1:(sel&&sel.t=='c'?.04:.07);mt.emissive.setHex(sel&&hit?0x333333:0);
+  if(on&&hit)rows.push(o)});
+ S.traverse(s=>{if(s.userData.pl)s.visible=labOn});hov=null;
+ tags.forEach(t=>S.remove(t));tags=[];
+ WR.forEach(o=>{if(o.num){const col=PAL[(o.num-1)%PAL.length];[o.a,o.b].forEach(r=>{const t=spr(String(o.num),46,.017,col);t.position.copy(pos[r]).add(new THREE.Vector3(0,2.8,0));S.add(t);tags.push(t)})}});
+ const rel=new Set();if(sel&&sel.t=='c'){rel.add(sel.id);rows.forEach(o=>{rel.add(o.o.ca);rel.add(o.o.cb)})}
+ picks.forEach(m=>{const ok=!(sel&&sel.t=='c')||rel.has(m.userData.cid);m.material.transparent=true;m.material.opacity=ok?1:.15});
+ document.getElementById('info').innerHTML=sel?(sel.t=='c'?`<b>${CM[sel.id].name}</b>：${rows.length} 條線（目前顯示）`:`<b>已選 1 條線</b>`):`顯示 ${rows.length} / ${WR.length} 條線。上方可切換訊號／電源／馬達／感測／通訊。`;
+ document.getElementById('list').innerHTML=rows.map(o=>`<div class="r" data-i="${WR.indexOf(o)}"><i style="background:${o.num?PAL[(o.num-1)%PAL.length]:(o.c&&o.g!='MOT'?o.c:G[o.g][0])}">${o.num||''}</i><div><b>${nmOf(o.a)}</b> → <b>${nmOf(o.b)}</b><small>${G[o.g][2]}${o.n?'・'+o.n:''}</small></div></div>`).join('')}
+document.getElementById('grp').innerHTML=Object.keys(G).map(k=>`<label class="g"><input type="checkbox" data-g="${k}" ${G[k][3]?'checked':''}><i style="background:${G[k][0]}"></i><span>${G[k][2]}</span><small>${W.filter(o=>o.g==k).length}</small></label>`).join('');
+document.getElementById('grp').onchange=e=>{G[e.target.dataset.g][3]=e.target.checked?1:0;refresh()};
+const LS=document.getElementById('list');
+LS.onclick=e=>{const r=e.target.closest('.r');if(!r)return;const o=WR[+r.dataset.i];if(sel&&sel.t=='c'){hov=hov===o?null:o;applyHov()}else{sel={t:'w',w:o};refresh()}};
+LS.onmouseover=e=>{const r=e.target.closest('.r');if(sel&&sel.t=='c'){hov=r?WR[+r.dataset.i]:null;applyHov()}};
+LS.onmouseleave=()=>{hov=null;applyHov()};
+bLab.onclick=()=>{labOn=!labOn;bLab.classList.toggle('on',labOn);refresh()};
+bTop.onclick=()=>{az=0;el=1.5;dist=120;tg.set(0,0,0);setCam()};bIso.onclick=()=>{az=.45;el=.85;dist=135;tg.set(0,0,0);setCam()};
+const PRE={'訊號':['PWM','MOT','ENC','TRG','ECH','UART','I2C','SD'],'電源':['VM','V5','V33','GND'],'馬達':['PWM','MOT'],'感測':['ENC','TRG','ECH'],'通訊':['UART','I2C','SD'],'電阻電容':['PAS','VM','V33','GND','MOT','PWM','ENC','ECH'],'全部':Object.keys(G)};
+function setPre(n){for(const k in G)G[k][3]=PRE[n].includes(k)?1:0;sel=null;document.querySelectorAll('#grp input').forEach(i=>i.checked=!!G[i.dataset.g][3]);document.querySelectorAll('#pre button').forEach(b=>b.classList.toggle('on',b.textContent==n));refresh()}
+document.getElementById('pre').innerHTML=Object.keys(PRE).map(n=>`<button>${n}</button>`).join('');
+document.getElementById('pre').onclick=e=>{if(e.target.tagName=='BUTTON')setPre(e.target.textContent)};
+const ptr=new Map(),ray=new THREE.Raycaster(),tip=document.getElementById('tip');let moved=0;
+function hit(e){const r=cv.getBoundingClientRect();ray.setFromCamera(new THREE.Vector2((e.clientX-r.left)/r.width*2-1,-((e.clientY-r.top)/r.height)*2+1),cam);
+ return ray.intersectObjects(wm.filter(m=>m.visible&&m.material.opacity>.5).concat(picks),false)[0]}
+function pan(dx,dy){const s=dist*.0016;tg.x+=(-Math.cos(az)*dx-Math.sin(az)*dy)*s;tg.z+=(Math.sin(az)*dx-Math.cos(az)*dy)*s}
+cv.addEventListener('pointerdown',e=>{anim=null;cv.setPointerCapture(e.pointerId);ptr.set(e.pointerId,{x:e.clientX,y:e.clientY});moved=0});
+cv.addEventListener('pointermove',e=>{const p=ptr.get(e.pointerId);
+ if(!p){const h=hit(e);if(h&&h.object.userData.w){const o=h.object.userData.w;tip.style.display='block';tip.style.left=e.offsetX+14+'px';tip.style.top=e.offsetY+14+'px';tip.innerHTML=`<b>${G[o.g][2]}</b><br>${nmOf(o.a)} → ${nmOf(o.b)}${o.n?'<br>'+o.n:''}`}else tip.style.display='none';return}
+ const dx=e.clientX-p.x,dy=e.clientY-p.y,q=[...ptr].find(([k])=>k!=e.pointerId);
+ if(q){const d0=Math.hypot(p.x-q[1].x,p.y-q[1].y),d1=Math.hypot(e.clientX-q[1].x,e.clientY-q[1].y);dist=clamp(dist*d0/d1,12,320);pan(dx/2,dy/2)}
+ else if(e.buttons&2||e.shiftKey||e.ctrlKey||e.metaKey)pan(dx,dy);else{az-=dx*.006;el=clamp(el+dy*.006,.08,1.56)}
+ p.x=e.clientX;p.y=e.clientY;moved+=Math.abs(dx)+Math.abs(dy);setCam()});
+cv.addEventListener('pointerup',e=>{if(ptr.size==1&&moved<5){const h=hit(e);sel=h?(h.object.userData.w?{t:'w',w:h.object.userData.w}:{t:'c',id:h.object.userData.cid}):null;refresh();if(sel&&sel.t=='c'){const c=CM[sel.id];anim={t:new THREE.Vector3(c.x,0,c.z),d:Math.min(dist,75)}}}ptr.delete(e.pointerId)});
+cv.addEventListener('pointercancel',e=>ptr.delete(e.pointerId));
+let anim=null;
+function gp(e){const r=cv.getBoundingClientRect();cam.updateMatrixWorld();ray.setFromCamera(new THREE.Vector2((e.clientX-r.left)/r.width*2-1,-((e.clientY-r.top)/r.height)*2+1),cam);const t=-ray.ray.origin.y/ray.ray.direction.y;return t>0?ray.ray.origin.clone().addScaledVector(ray.ray.direction,t):null}
+cv.addEventListener('wheel',e=>{e.preventDefault();anim=null;const f=1+clamp(e.deltaY,-120,120)*.0012,nd=clamp(dist*f,12,320),p=gp(e);if(p){const k=1-nd/dist;tg.x+=(p.x-tg.x)*k;tg.z+=(p.z-tg.z)*k}dist=nd;setCam()},{passive:false});
+cv.addEventListener('dblclick',e=>{const p=gp(e);if(p)anim={t:new THREE.Vector3(p.x,0,p.z),d:35}});
+cv.addEventListener('contextmenu',e=>e.preventDefault());
+addEventListener('keydown',e=>{if(e.code=='Space'){e.preventDefault();if(document.activeElement&&document.activeElement.blur)document.activeElement.blur();anim={t:new THREE.Vector3(0,0,0),d:135}}});
+addEventListener('keyup',e=>{if(e.code=='Space')e.preventDefault()});
+new ResizeObserver(()=>{const r=document.getElementById('stage').getBoundingClientRect();R.setSize(r.width,r.height,false);cam.aspect=r.width/r.height;cam.updateProjectionMatrix()}).observe(document.getElementById('stage'));
+setCam();setPre('訊號');(function loop(){if(anim){tg.lerp(anim.t,.18);dist+=(anim.d-dist)*.18;setCam();if(tg.distanceTo(anim.t)<.1&&Math.abs(anim.d-dist)<.3)anim=null}R.render(S,cam);requestAnimationFrame(loop)})();
+</script></body></html>
