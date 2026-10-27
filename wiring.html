@@ -1,0 +1,456 @@
+<!doctype html>
+<html lang="zh-Hant"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>RC4WD 4WD 3D 接線圖</title>
+<style>
+:root{--bg:#eef0f4;--pn:#fff;--tx:#1b2130;--mu:#697386;--bd:#d6dbe4;--ac:#2b6cff;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f131b;--pn:#181e29;--tx:#e6e9f0;--mu:#8f9ab0;--bd:#2b3344;--ac:#6b9bff;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0f131b;--pn:#181e29;--tx:#e6e9f0;--mu:#8f9ab0;--bd:#2b3344;--ac:#6b9bff;color-scheme:dark}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--tx);font:14px/1.45 "Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif}
+#app{display:flex;height:100%}
+#stage{flex:1;position:relative;min-width:0}
+#cv{width:100%;height:100%;display:block;touch-action:none;cursor:grab}
+aside{width:var(--aw,310px);flex:none;max-width:75vw;min-width:230px;box-sizing:border-box;background:var(--pn);border-left:1px solid var(--bd);overflow:auto;padding:14px;display:flex;flex-direction:column;gap:12px}
+h1{font-size:17px;margin:0}
+.mu{color:var(--mu);font-size:12.5px;margin:4px 0 0}
+label.g{display:flex;align-items:center;gap:8px;padding:3px 0;cursor:pointer}
+label.g i{width:22px;height:5px;border-radius:3px;flex:none}
+label.g span{flex:1}label.g small{color:var(--mu)}
+.btns{display:flex;flex-wrap:wrap;gap:6px}
+button{font:inherit;font-size:12.5px;color:var(--tx);background:transparent;border:1px solid var(--bd);border-radius:6px;padding:4px 9px;cursor:pointer}
+button:hover,button.on{border-color:var(--ac);color:var(--ac)}
+#info{font-size:13px;padding:8px 10px;border:1px solid var(--bd);border-radius:6px}
+#list{display:flex;flex-direction:column}
+.r{display:flex;gap:8px;align-items:flex-start;padding:5px 2px;border-top:1px solid var(--bd);cursor:pointer;font-size:12.5px}
+.r:hover{background:color-mix(in srgb,var(--ac) 10%,transparent)}
+.r i{min-width:4px;align-self:stretch;border-radius:3px;flex:none;color:#fff;font:600 11px/1 system-ui;display:flex;align-items:center;justify-content:center;padding:0 4px}
+.r small{color:var(--mu);display:block}
+#prog{border:1px solid var(--bd);border-radius:8px;padding:9px 10px;display:flex;flex-direction:column;gap:7px}
+#pbarw{height:9px;border-radius:5px;background:color-mix(in srgb,var(--mu) 25%,transparent);overflow:hidden}#pbar{height:100%;width:0;background:#2eb872;transition:width .2s}
+#pnum{font-size:13px}#pnum small{color:var(--mu)}#pgrp{display:flex;flex-wrap:wrap;gap:4px 8px;font-size:11.5px;color:var(--mu)}.pg i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:3px}
+#prog select{font:inherit;font-size:12.5px;color:var(--tx);background:var(--pn);border:1px solid var(--bd);border-radius:6px;padding:3px 6px}
+#pmsg{font-size:12px;color:var(--mu);min-height:1em}
+#tabs{position:fixed;top:10px;left:10px;z-index:6;display:flex;border:1px solid var(--bd);border-radius:9px;overflow:hidden;background:var(--pn);box-shadow:0 2px 8px #0003}
+#tabs button{border:0;border-radius:0;padding:6px 14px;font-weight:600}#tabs button.on{background:var(--ac);color:#fff}
+#rz{width:7px;flex:none;cursor:col-resize;background:var(--bd);position:relative;touch-action:none}#rz:hover,#rz.on{background:var(--ac)}#rz:after{content:"";position:absolute;left:2px;top:50%;height:36px;width:3px;margin-top:-18px;border-radius:2px;background:var(--mu);opacity:.6}
+body.drag{user-select:none;cursor:col-resize}
+#parts{display:none;height:100%;overflow:auto;box-sizing:border-box;padding:56px 18px 24px}
+body.pv #app{display:none}body.pv #parts{display:block}
+#phd{max-width:1200px;margin:0 auto 6px;display:flex;flex-direction:column;gap:8px}#phd .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+#bbar{height:8px;border-radius:5px;background:color-mix(in srgb,var(--mu) 25%,transparent);overflow:hidden}#bbar i{display:block;height:100%;width:0;background:#2b8fd6;transition:width .2s}
+#bsum{font-size:13px}#bSel{font:inherit;font-size:12.5px;color:var(--tx);background:var(--pn);border:1px solid var(--bd);border-radius:6px;padding:3px 6px}
+#blist{max-width:1200px;margin:0 auto}#blist h3{margin:18px 0 8px;font-size:14px;color:var(--mu)}
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px}
+.pc{border:1px solid var(--bd);background:var(--pn);border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:6px}.pc.dn{opacity:.55}
+.pc .t{display:flex;gap:8px;align-items:flex-start}.pc .t input[type=checkbox]{margin-top:4px;cursor:pointer;flex:none}.pc .t b{flex:1;font-size:13.5px}.pc .q{font-weight:700;font-size:15px}
+.pc .lv{color:#fff;font-size:10.5px;padding:0 7px;border-radius:9px;align-self:flex-start;margin-top:3px}
+.pc .d{font-size:12px;color:var(--mu)}
+.pc .pins{display:flex;flex-wrap:wrap;gap:3px}.pc .pins span{font:11px/1.6 ui-monospace,Consolas,monospace;border:1px solid var(--bd);border-radius:4px;padding:0 5px;background:color-mix(in srgb,var(--ac) 8%,transparent)}
+.pc .pins span.pw{border-color:#d64545;color:#d64545}.pc .pins span.gd{color:var(--mu)}
+.pc .bn{width:100%;box-sizing:border-box;font:inherit;font-size:12px;color:var(--tx);background:transparent;border:1px solid var(--bd);border-radius:5px;padding:3px 6px}
+@media(max-width:760px){#rz{display:none}}
+#det{border:1px solid var(--bd);border-radius:8px;padding:10px;font-size:13px;display:none;flex-direction:column;gap:5px}
+#det .dh{display:flex;gap:7px;align-items:center}#det .lv{color:#fff;font-size:11px;padding:1px 7px;border-radius:9px}
+#det .dt{font-weight:600}#det .dt span{color:var(--mu)}#det .dk{font-size:11.5px;color:var(--mu);margin-top:4px;font-weight:600}
+#det .warn{background:color-mix(in srgb,#d64545 14%,transparent);border-radius:6px;padding:3px 8px;font-weight:600}
+#det .chk{display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:6px}#det .chk label{cursor:pointer;display:flex;gap:4px;align-items:center}
+#det textarea{width:100%;box-sizing:border-box;font:inherit;font-size:12.5px;color:var(--tx);background:var(--pn);border:1px solid var(--bd);border-radius:6px;padding:5px 7px;resize:vertical}
+.r .ck{margin:2px 2px 0 0;flex:none;cursor:pointer}.r.dn{opacity:.55}.r .bd{margin-left:auto;display:flex;gap:2px;flex:none}
+.b{font-style:normal;font-size:10.5px;padding:0 5px;border-radius:8px;color:#fff;height:16px;line-height:16px}.b.d{background:#2b8fd6}.b.t{background:#2eb872}.b.s{background:#7a8599}.b.n{background:#c98a00}
+#tip{position:absolute;pointer-events:none;background:#141824;color:#fff;font-size:12px;padding:5px 8px;border-radius:6px;display:none;max-width:260px;z-index:3}
+@media(max-width:760px){#app{flex-direction:column}aside{width:auto;height:46%;border-left:0;border-top:1px solid var(--bd)}}
+</style></head><body>
+<div id="tabs"><button id="tW" class="on">接線圖</button><button id="tP">零件清單</button></div>
+<div id="parts"><div id="phd"><h1 style="margin-left:150px">零件與模組清單</h1>
+ <div id="bsum"></div><div id="bbar"><i></i></div>
+ <div class="row"><select id="bSel"><option value="all">顯示：全部</option><option value="must">只看必買</option><option value="todo">還沒買的</option></select><button id="bCsv">匯出採購 CSV</button><button id="bJson">匯出清單</button><button id="bImpB">匯入清單</button><button id="bClr">清除勾選</button><input type="file" id="fBom" accept=".json,application/json" style="display:none"></div></div>
+ <div id="blist"></div></div>
+<div id="app"><div id="stage"><canvas id="cv"></canvas><div id="tip"></div></div><div id="rz" title="拖曳調整右側寬度（雙擊還原）"></div>
+<aside>
+<div><h1>RC4WD 4WD 接線圖</h1>
+<p class="mu">拖曳旋轉・按住 Ctrl 拖曳、右鍵或雙指平移・滾輪縮放・空白鍵回中央。點元件或線可聚焦，點空白處取消。要改線就把需求告訴 Claude，例如「FL 編碼器改接 GP20」。</p></div>
+<div id="grp"></div>
+<div class="btns" id="pre"></div>
+<div class="btns"><button id="bLab" class="on">針腳標籤</button><button id="bTop">俯視</button><button id="bIso">斜視</button></div>
+<div id="prog"><b>施工進度</b>
+ <div id="pbarw"><div id="pbar"></div></div><div id="pnum"></div><div id="pgrp"></div>
+ <div class="btns"><select id="selF" title="只顯示…"><option value="all">顯示：全部</option><option value="todo">還沒做的</option><option value="notest">已焊還沒測</option><option value="must">只看必要</option><option value="opt">只看建議/選用</option><option value="skip">已略過</option><option value="note">有備註</option></select>
+ <label class="g" style="padding:0"><input type="checkbox" id="ckH"><span>隱藏已完成</span></label></div>
+ <div class="btns"><button id="bExpJ" title="下次用「匯入進度」還原">匯出進度</button><button id="bImp">匯入進度</button><button id="bExpC">匯出 CSV 清單</button><button id="bRst">清除</button><input type="file" id="fImp" accept=".json,application/json" hidden></div>
+ <div id="pmsg">進度會自動存在這個瀏覽器；換電腦/手機請用「匯出進度」再「匯入進度」。</div></div>
+<div id="info"></div><div id="det"></div><div id="list"></div>
+</aside></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+/* ===================== 資料區：改線只動這裡 =====================
+ 座標單位≈公分的示意比例；x 向右、z 向車尾，車頭在 -z。
+ 元件 pins 的 "id|顯示名" ；線 w(起點,終點,線組,備註,顏色?) 起訖格式 元件.針腳 */
+const G={ // 線組：[顏色,粗細,名稱,預設顯示]
+ VM:['#ff3b30',.26,'電池 VM（12V）',1],V5:['#ff9500',.2,'5V',1],V33:['#ffd60a',.16,'3V3',1],GND:['#9aa3b2',.14,'GND 共地',0],
+ PWM:['#2f81ff',.14,'馬達控制 PWM/IN',1],MOT:['#ff453a',.18,'馬達線（紅/白）',1],ENC:['#30d158',.14,'編碼器 A 相',1],
+ TRG:['#40c8e0',.14,'超音波 Trig',1],ECH:['#bf5af2',.14,'超音波 Echo（經分壓）',1],UART:['#ff2d95',.16,'UART 對接',1],I2C:['#7ee787',.14,'I2C 電量計＋六軸（INA219 / LSM6DS3）',1],SD:['#00d4aa',.14,'microSD 記憶卡（SD_MMC 1-bit）',1],
+ PAS:['#ffb86b',.12,'被動元件（電阻/電容）',1]};
+const LP=['GP0','GP1','GND','GP2','GP3','GP4','GP5','GND','GP6','GP7','GP8','GP9','GND','GP10','GP11','GP12','GP13','GND','GP14','GP15'];
+const RP=['VBUS','VSYS','GND','3V3_EN','3V3','ADC_VREF','GP28','GND','GP27','GP26','RUN','GP22','GND','GP21','GP20','GP19','GP18','GND','GP17','GP16'];
+const pp=(a,left)=>a.map((n,i)=>{const p=left?i+1:40-i;return(n=='GND'?n+p:n)+'|'+n+'·'+p});
+const C=[
+ {id:'PICO',name:'Pico RP2040',x:0,z:0,w:6,h:.8,d:20,col:'#2e8b57',pins:{L:pp(LP,1),R:pp(RP,0)}},
+ {id:'ESP',name:'ESP32-S3',x:0,z:-20,w:18,h:1,d:12,col:'#37474f',p:1.7,pins:{B:['5V','GND','TX|GPIO1 TX','RX|GPIO2 RX','3V3','SDA|GPIO41 SDA','SCL|GPIO42 SCL','SDCLK|GPIO39 SD_CLK','SDCMD|GPIO38 SD_CMD','SDD0|GPIO40 SD_D0']}},
+ {id:'SD',name:'microSD（ESP32-S3 板載插槽）',x:-17,z:-11,w:7,h:1,d:3,col:'#00695c',p:2,pins:{R:['CLK','CMD','D0']}},
+ {id:'IMU',name:'LSM6DS3 六軸',x:22.5,z:-23.5,w:5.5,h:1,d:4,col:'#ad1457',pins:{L:['VCC','GND','SDA','SCL','SA0|SA0→GND']},p:.75},
+ {id:'INA',name:'INA219 電量計',x:22,z:-12,w:8,h:1,d:5,col:'#6a1b9a',pins:{L:['VCC','GND','SDA','SCL'],R:['VIN-|VIN− 接電池+']}},
+ {id:'BATT',name:'3S 電池',x:-40,z:8,w:7,h:4,d:14,col:'#e0a100',p:2,pins:{R:['+','-|−']}},
+ {id:'SWF',name:'開關+保險絲',x:-29,z:8,w:6,h:1.2,d:5,col:'#8d6e63',pins:{L:['IN'],R:['OUT']}},
+ {id:'PB',name:'5V 行動電源',x:40,z:8,w:7,h:4,d:14,col:'#6d4c41',p:2,pins:{L:['5V','GND']}},
+ {id:'D1',name:'1N5819',x:7,z:7.5,w:4,h:1,d:2,col:'#546e7a',pins:{L:['A|A 陽極'],R:['K|K 陰極']}},
+ {id:'VM',bus:1,name:'VM 匯流',x:-25,z:15,col:'#ff3b30'},{id:'GND',bus:1,name:'GND 匯流',x:0,z:12,col:'#78818f'},
+ {id:'V33',bus:1,name:'3V3 匯流',x:0,z:17.5,col:'#e6b800'},{id:'V5',bus:1,name:'5V 匯流',x:9,z:22.5,col:'#ff9500'},
+ {id:'V33E',bus:1,name:'ESP 3V3 匯流',x:31,z:-12,col:'#e6b800'},{id:'SDAB',bus:1,name:'I2C SDA 匯流',x:14,z:-17,col:'#7ee787'},{id:'SCLB',bus:1,name:'I2C SCL 匯流',x:14,z:-20,col:'#7ee787'},
+ {id:'RPSDA',name:'SDA 上拉 4.7kΩ(選用)',x:19,z:-16,w:2.4,h:1,d:2.4,col:'#c2b280',pins:{L:['1|→SDA'],R:['2|→3V3']}},
+ {id:'RPSCL',name:'SCL 上拉 4.7kΩ(選用)',x:19,z:-19.5,w:2.4,h:1,d:2.4,col:'#c2b280',pins:{L:['1|→SCL'],R:['2|→3V3']}}];
+const tb=(id,nm,x,inn,out)=>C.push({id,name:nm,x,z:-2,w:6,h:1,d:9,col:'#c0392b',pins:{[inn]:['PWMA','AIN1','AIN2','PWMB','BIN1','BIN2','STBY','VCC'],[out]:['AO1','AO2','BO1','BO2','VM','GND']}});
+tb('TB1','TB6612 #1 左側',-16,'R','L');tb('TB2','TB6612 #2 右側',16,'L','R');
+// 每輪：驅動板/通道、[PWM,IN1,IN2]、編碼器A相、[Trig,Echo]、馬達位置/針腳側、超音波位置/針腳側
+const WH={FL:{tb:'TB1',ch:'A',m:[0,1,2],e:12,s:[13,15],x:-31,z:-22,ms:'R',sx:-12,sz:-33,sb:'B'},
+ RL:{tb:'TB1',ch:'B',m:[3,4,5],e:16,s:[22,26],x:-31,z:22,ms:'R',sx:-12,sz:33,sb:'F'},
+ FR:{tb:'TB2',ch:'A',m:[6,7,8],e:14,s:[17,19],x:31,z:-22,ms:'L',sx:12,sz:-33,sb:'B'},
+ RR:{tb:'TB2',ch:'B',m:[9,10,11],e:18,s:[27,28],x:31,z:22,ms:'L',sx:12,sz:33,sb:'F'}};
+const W=[],w=(a,b,g,n,c)=>W.push({a,b,g,n:n||'',c});
+for(const k in WH){const o=WH[k],A=o.ch,P=[A=='A'?'PWMA':'PWMB',A+'IN1'.replace('AIN1',A=='A'?'AIN1':'BIN1'),A=='A'?'AIN2':'BIN2'];
+ C.push({id:k,name:k+' 馬達 GA25',x:o.x,z:o.z,w:9,h:4,d:7,col:'#455a64',pins:{[o.ms]:['M+|紅 M+','M-|白 M−','VCC|藍 VCC','GND|黑 GND','A|黃 A','B|綠 B（不接）']}});
+ C.push({id:'S'+k,name:k+' 超音波',x:o.sx,z:o.sz,w:9,h:1.6,d:3,col:'#1565c0',p:2,pins:{[o.sb]:['VCC','Trig','Echo','GND']}});
+ C.push({id:'D'+k,name:k+' Echo 分壓 R1 1kΩ+R2 2kΩ',x:o.sx,z:o.sz+(o.sz<0?7:-7),w:5,h:.8,d:2,col:'#795548',pins:{L:['IN|Echo 5V'],R:['OUT|→Pico'],B:['GND|R2 2k(2×1k)→GND']}});
+ w(`PICO.GP${o.m[0]}`,`${o.tb}.${P[0]}`,'PWM','PWM 20kHz');w(`PICO.GP${o.m[1]}`,`${o.tb}.${P[1]}`,'PWM','IN1');w(`PICO.GP${o.m[2]}`,`${o.tb}.${P[2]}`,'PWM','IN2');
+ w(`${o.tb}.${A}O1`,`${k}.M+`,'MOT','紅線','#ff453a');w(`${o.tb}.${A}O2`,`${k}.M-`,'MOT','白線','#f2f2f7');
+ w(`${k}.A`,`PICO.GP${o.e}`,'ENC','黃線 A 相；B 相不接');w(`V33.E${k}`,`${k}.VCC`,'V33','編碼器 3.3V');w(`${k}.GND`,`GND.E${k}`,'GND');
+ w(`PICO.GP${o.s[0]}`,`S${k}.Trig`,'TRG');w(`S${k}.Echo`,`D${k}.IN`,'ECH','Echo 為 5V，先分壓');w(`D${k}.OUT`,`PICO.GP${o.s[1]}`,'ECH','分壓後約 3.3V');
+ w(`D${k}.GND`,`GND.D${k}`,'GND','R2 = 2 顆 1kΩ 串聯 → GND');w(`V5.S${k}`,`S${k}.VCC`,'V5');w(`S${k}.GND`,`GND.S${k}`,'GND');
+ // ---- 被動元件（並聯在既有線路上，線組 PAS；不佔用針腳）----
+ C.push({id:'CM'+k,name:k+' 馬達電容 0.1µF',x:o.x<0?o.x-9:o.x+9,z:o.z,w:2.4,h:1.2,d:4,col:'#d9a441',pins:{[o.ms=='R'?'L':'R']:['1|M+','2|M−']},p:2.2});
+ C.push({id:'RD'+k,name:k+' 下拉 10kΩ×3',x:o.x<0?o.x-9:o.x+9,z:o.z+(o.z<0?-8:8),w:2.4,h:1,d:7,col:'#c2b280',pins:{[o.ms=='R'?'L':'R']:['1|PWM','2|IN1','3|IN2','G|GND']},p:1.6});
+ C.push({id:'RE'+k,name:k+' 編碼器上拉 4.7kΩ(選用)',x:o.x<0?o.x-9:o.x+9,z:o.z+(o.z<0?8:15),w:2.4,h:1,d:4,col:'#c2b280',pins:{[o.ms=='R'?'L':'R']:['1|→A 線','2|→3V3']},p:2.2});
+ w(`CM${k}.1`,`${k}.M+`,'PAS','並聯在馬達 M+/M− 端子，越近越好');w(`CM${k}.2`,`${k}.M-`,'PAS');
+ w(`RD${k}.1`,`${o.tb}.${P[0]}`,'PAS','10k 下拉到 GND（重啟瞬間不亂轉）');w(`RD${k}.2`,`${o.tb}.${P[1]}`,'PAS');w(`RD${k}.3`,`${o.tb}.${P[2]}`,'PAS');w(`RD${k}.G`,`GND.RD${k}`,'GND');
+ w(`RE${k}.1`,`${k}.A`,'PAS','選用：A 線邊緣圓鈍時再加；Pico 已開內部上拉');w(`RE${k}.2`,`V33.RE${k}`,'V33');}
+for(const t of['TB1','TB2']){w(`V33.${t}V`,`${t}.VCC`,'V33');w(`V33.${t}S`,`${t}.STBY`,'V33','STBY 接 3V3 常開');w(`VM.${t}`,`${t}.VM`,'VM','VM 旁並 1000µF');w(`${t}.GND`,`GND.${t}`,'GND');
+ C.push({id:'CT'+t,name:t+' 電解電容 1000µF/25V',x:t=='TB1'?-16:16,z:7,w:3.6,h:3,d:3.6,col:'#1a237e',pins:{L:['+'],R:['-|−']},p:1});
+ w(`VM.CT${t}`,`CT${t}.+`,'VM','電容 + 接 VM（靠近驅動板，注意極性）');w(`CT${t}.-`,`GND.CT${t}`,'GND','電容 − 接 GND（長腳為 +）')}
+w('BATT.+','SWF.IN','VM','電池 + → XT60');w('SWF.OUT','VM.SW','VM','保險絲 5~7.5A');w('BATT.-','GND.BATT','GND');
+w('PB.5V','V5.PB','V5');w('PB.GND','GND.PB','GND');w('V5.ESP','ESP.5V','V5');w('V5.D','D1.A','V5');
+w('D1.K','PICO.VSYS','V5','肖特基 → VSYS（不接 VBUS）');w('PICO.3V3','V33.PICO','V33','3V3(OUT) 供板子/編碼器');
+w('PICO.GND3','GND.PICO','GND');w('ESP.GND','GND.ESP','GND');
+w('ESP.3V3','V33E.ESP','V33','ESP32 自己的 3V3（和 Pico 的 3V3 分開，不要並聯兩顆穩壓）');w('V33E.INA','INA.VCC','V33','INA219 VCC');w('V33E.IMU','IMU.VCC','V33','LSM6DS3 VCC：3.3V，不要接 5V');
+w('ESP.SDA','SDAB.ESP','I2C','I2C SDA = GPIO41');w('SDAB.INA','INA.SDA','I2C');w('SDAB.IMU','IMU.SDA','I2C');
+w('ESP.SCL','SCLB.ESP','I2C','I2C SCL = GPIO42');w('SCLB.INA','INA.SCL','I2C');w('SCLB.IMU','IMU.SCL','I2C');
+w('IMU.GND','GND.IMU','GND');w('IMU.SA0','GND.IMUA','GND','SA0 接 GND → 位址 0x6A（接 3V3 則為 0x6B，韌體兩個都會找）');
+w('RPSDA.1','SDAB.RP','PAS','選用：多數模組已內建上拉，沒有再加；並太多會讓上拉過強（< 2kΩ）');w('RPSDA.2','V33E.RPSDA','V33');
+w('RPSCL.1','SCLB.RP','PAS','選用');w('RPSCL.2','V33E.RPSCL','V33');
+w('INA.GND','GND.INA','GND');w('VM.INA','INA.VIN-','VM','電池+（開關/保險絲之後）→ VIN−：只量電壓，VIN+ 不接、不串聯負載');
+w('ESP.SDCLK','SD.CLK','SD','SD_CLK = GPIO39（板載插槽已接好，只是畫出來）');w('ESP.SDCMD','SD.CMD','SD','SD_CMD = GPIO38');w('ESP.SDD0','SD.D0','SD','SD_D0 = GPIO40（1-bit 模式只用 D0）');
+w('PICO.GP20','ESP.RX','UART','Pico TX → ESP RX（UART1）');w('PICO.GP21','ESP.TX','UART','Pico RX ← ESP TX');
+/* ===================== 以下為渲染程式 ===================== */
+const cv=document.getElementById('cv'),R=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:true});
+R.setPixelRatio(Math.min(devicePixelRatio,2));
+const S=new THREE.Scene(),cam=new THREE.PerspectiveCamera(42,1,.5,700);
+S.add(new THREE.AmbientLight(0xffffff,.8));const dl=new THREE.DirectionalLight(0xffffff,.6);dl.position.set(30,70,25);S.add(dl);
+let az=.45,el=.85,dist=135,tg=new THREE.Vector3(0,0,0);const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+function setCam(){cam.position.set(tg.x+dist*Math.cos(el)*Math.sin(az),dist*Math.sin(el),tg.z+dist*Math.cos(el)*Math.cos(az));cam.lookAt(tg)}
+function spr(t,fs,sc,bg){const c=document.createElement('canvas'),x=c.getContext('2d');x.font=`600 ${fs}px sans-serif`;
+ const wd=Math.ceil(x.measureText(t).width)+20,h=fs+16;c.width=wd;c.height=h;x.font=`600 ${fs}px sans-serif`;
+ x.fillStyle=bg||'rgba(18,22,32,.85)';x.beginPath();x.roundRect?x.roundRect(0,0,wd,h,10):x.rect(0,0,wd,h);x.fill();
+ x.fillStyle='#fff';x.textBaseline='middle';x.fillText(t,10,h/2+2);
+ const tx=new THREE.CanvasTexture(c);tx.minFilter=THREE.LinearFilter;
+ const s=new THREE.Sprite(new THREE.SpriteMaterial({map:tx,depthTest:false,transparent:true}));s.scale.set(wd*sc,h*sc,1);s.renderOrder=10;return s}
+const ref=r=>{const i=r.indexOf('.');return[r.slice(0,i),r.slice(i+1)]},CM={};C.forEach(c=>CM[c.id]=c);
+W.forEach(o=>[o.a,o.b].forEach(r=>{const[i,p]=ref(r),c=CM[i];if(!c)throw Error('找不到元件 '+i);if(c.bus){c.taps=c.taps||[];if(!c.taps.includes(p))c.taps.push(p)}}));
+C.filter(c=>c.bus).forEach(c=>{c.w=(c.taps||[]).length*1.2+1.2;c.h=1;c.d=1.8});
+const pos={},plab={},used={};W.forEach(o=>[o.a,o.b].forEach(r=>used[r]=used[r]||o.g));
+const plate=new THREE.Mesh(new THREE.BoxGeometry(108,1,86),new THREE.MeshLambertMaterial({color:0x8a94a6,transparent:true,opacity:.28}));plate.position.y=-.6;S.add(plate);
+const ar=spr('▲ 車頭',56,.035,'rgba(43,108,255,.9)');ar.position.set(0,.5,-40);S.add(ar);
+const picks=[];
+C.forEach(c=>{const g=new THREE.Group();g.position.set(c.x,0,c.z);S.add(g);
+ const m=new THREE.Mesh(new THREE.BoxGeometry(c.w,c.h,c.d),new THREE.MeshLambertMaterial({color:c.col}));m.position.y=c.h/2;m.userData.cid=c.id;g.add(m);picks.push(m);
+ const nm=spr(c.name,50,.028);nm.position.set(0,c.h+(c.bus?2.2:3.2),c.bus?-1.6:0);g.add(nm);
+ const lst=[];
+ if(c.bus)(c.taps||[]).forEach((t,i)=>lst.push({id:t,l:'',x:-((c.taps.length-1)*.6)+i*1.2,z:0,s:'T'}));
+ else for(const s in c.pins){const a=c.pins[s],n=a.length,p=c.p||1;a.forEach((q,i)=>{const[id,l]=q.split('|'),o=(i-(n-1)/2)*p;
+  lst.push({id,l:l||id,s,i,x:s=='L'?-c.w/2+.6:s=='R'?c.w/2-.6:o,z:s=='F'?-c.d/2+.6:s=='B'?c.d/2-.6:o})})}
+ lst.forEach(q=>{const k=c.id+'.'+q.id,on=used[k];plab[k]=q.l;
+  const d=new THREE.Mesh(new THREE.SphereGeometry(on?.3:.17,10,8),new THREE.MeshLambertMaterial({color:on?G[on][0]:0x9aa3b2}));
+  d.position.set(q.x,c.h,q.z);g.add(d);pos[k]=new THREE.Vector3(c.x+q.x,c.h,c.z+q.z);
+  if(on&&q.l&&q.s!='T'){const t=spr(q.l,40,.011);t.userData.pl=1;const hw=t.scale.x/2+.5;
+   if(q.s=='L')t.position.set(q.x-hw,c.h+.2,q.z);else if(q.s=='R')t.position.set(q.x+hw,c.h+.2,q.z);
+   else t.position.set(q.x,c.h+1+(q.i%2)*.8,q.z+(q.s=='F'?-.6:.6));g.add(t)}})});
+function rp(p,r){const q=[p[0]];p.forEach(v=>{if(v.distanceTo(q[q.length-1])>.01)q.push(v)});const cp=new THREE.CurvePath();let s=q[0];
+ const ln=(a,b)=>{if(a.distanceTo(b)>.005)cp.add(new THREE.LineCurve3(a,b))};
+ for(let i=1;i<q.length-1;i++){const a=q[i-1],b=q[i],c=q[i+1],d1=b.distanceTo(a),d2=b.distanceTo(c),rr=Math.min(r,d1/2,d2/2),e1=b.clone().lerp(a,rr/d1),e2=b.clone().lerp(c,rr/d2);
+  ln(s,e1);cp.add(new THREE.QuadraticBezierCurve3(e1,b,e2));s=e2}
+ ln(s,q[q.length-1]);return cp}
+const WR=[],wm=[];
+W.forEach((o,k)=>{const a=pos[o.a],b=pos[o.b];if(!a||!b)throw Error('找不到針腳 '+o.a+' 或 '+o.b);
+ const H=5.4+(k%9)*.4,V=(x,z)=>new THREE.Vector3(x,H,z),jx=(a.x+b.x)/2+((k%7)-3)*.55;
+ const cu=rp([a,V(a.x,a.z),V(jx,a.z),V(jx,b.z),V(b.x,b.z),b],.9),gg=G[o.g];
+ const m=new THREE.Mesh(new THREE.TubeGeometry(cu,160,gg[1],6),new THREE.MeshLambertMaterial({color:o.c||gg[0],transparent:true}));
+ const r=o.o={m,ca:ref(o.a)[0],cb:ref(o.b)[0]};m.userData.w=o;S.add(m);WR.push(o);wm.push(m)});
+const nmOf=r=>{const[i,p]=ref(r),c=CM[i];return c.name+(plab[r]?' '+plab[r]:'')};
+const PAL=['#e6194b','#2e9e44','#3d5fd8','#f58231','#911eb4','#0a9d9d','#b38f00','#e03cc8','#7a5230','#5f7a00','#d1495b','#00798c'];
+let sel=null,labOn=true,tags=[],hov=null;
+function applyHov(){WR.forEach(o=>{const m=o.o.m.material;m.emissive.setHex(hov===o?0xaaaaaa:(sel&&o.num?0x333333:0));if(sel&&sel.t=='c'&&o.num)m.opacity=hov&&hov!==o?.2:1})}
+function refresh(){let n=0;const rows=[];
+ WR.forEach(o=>{const on=G[o.g][3]&&passF(o),hit=!sel||(sel.t=='c'?(o.o.ca==sel.id||o.o.cb==sel.id):sel.w===o);
+  o.o.m.visible=on;o.num=(sel&&sel.t=='c'&&hit&&on)?rows.length+1:0;const mt=o.o.m.material;mt.color.set(o.num?PAL[(o.num-1)%PAL.length]:(o.c||G[o.g][0]));mt.opacity=hit?1:(sel&&sel.t=='c'?.04:.07);mt.emissive.setHex(sel&&hit?0x333333:0);
+  if(on&&hit)rows.push(o)});
+ S.traverse(s=>{if(s.userData.pl)s.visible=labOn});hov=null;
+ tags.forEach(t=>S.remove(t));tags=[];
+ WR.forEach(o=>{if(o.num){const col=PAL[(o.num-1)%PAL.length];[o.a,o.b].forEach(r=>{const t=spr(String(o.num),46,.017,col);t.position.copy(pos[r]).add(new THREE.Vector3(0,2.8,0));S.add(t);tags.push(t)})}});
+ const rel=new Set();if(sel&&sel.t=='c'){rel.add(sel.id);rows.forEach(o=>{rel.add(o.o.ca);rel.add(o.o.cb)})}
+ picks.forEach(m=>{const ok=!(sel&&sel.t=='c')||rel.has(m.userData.cid);m.material.transparent=true;m.material.opacity=ok?1:.15});
+ document.getElementById('info').innerHTML=sel?(sel.t=='c'?`<b>${CM[sel.id].name}</b>：${rows.length} 條線（目前顯示）`:`<b>已選 1 條線</b>`):`顯示 ${rows.length} / ${WR.length} 條線。上方可切換訊號／電源／馬達／感測／通訊。`;
+ document.getElementById('list').innerHTML=rows.map(o=>`<div class="r${isDone(o)?' dn':''}" data-i="${WR.indexOf(o)}"><input type="checkbox" class="ck" title="已焊接" ${hasSt(o)&&hasSt(o).d?'checked':''}><i style="background:${o.num?PAL[(o.num-1)%PAL.length]:(o.c&&o.g!='MOT'?o.c:G[o.g][0])}">${o.num||''}</i><div><b>${nmOf(o.a)}</b> → <b>${nmOf(o.b)}</b><small>#${o.i} ${G[o.g][2]}${o.n?'・'+o.n:''}</small></div><span class="bd">${badge(o)}</span></div>`).join('');renderProgress();renderDetail()}
+document.getElementById('grp').innerHTML=Object.keys(G).map(k=>`<label class="g"><input type="checkbox" data-g="${k}" ${G[k][3]?'checked':''}><i style="background:${G[k][0]}"></i><span>${G[k][2]}</span><small>${W.filter(o=>o.g==k).length}</small></label>`).join('');
+document.getElementById('grp').onchange=e=>{G[e.target.dataset.g][3]=e.target.checked?1:0;refresh()};
+const LS=document.getElementById('list');
+LS.onclick=e=>{const r=e.target.closest('.r');if(!r)return;if(e.target.classList.contains('ck')){const o=WR[+r.dataset.i],s=stOf(o);s.d=e.target.checked?1:0;if(s.d)s.s=0;else s.t=0;saveProg();renderProgress();renderDetail();paintRows();if(HIDE||FIL!='all')refresh();return}const o=WR[+r.dataset.i];if(sel&&sel.t=='c'){hov=hov===o?null:o;applyHov()}else{sel={t:'w',w:o};refresh()}};
+LS.onmouseover=e=>{const r=e.target.closest('.r');if(sel&&sel.t=='c'){hov=r?WR[+r.dataset.i]:null;applyHov()}};
+LS.onmouseleave=()=>{hov=null;applyHov()};
+bLab.onclick=()=>{labOn=!labOn;bLab.classList.toggle('on',labOn);refresh()};
+bTop.onclick=()=>{az=0;el=1.5;dist=120;tg.set(0,0,0);setCam()};bIso.onclick=()=>{az=.45;el=.85;dist=135;tg.set(0,0,0);setCam()};
+/* ===================== 施工進度：每條線的功能 / 缺少後果 / 勾選 / 備註 / 匯出匯入 ===================== */
+const WN={FL:'前左',FR:'前右',RL:'後左',RR:'後右'};
+W.forEach((o,i)=>{o.i=i+1;o.k=o.a+'>'+o.b});
+function describe(o){
+ const[ca,pa]=ref(o.a),[cb,pb]=ref(o.b),A=o.a,B=o.b,g=o.g;let r;
+ const wh=k=>WN[k]||k,chan=p=>/^(PWM|AIN|BIN)/.test(p)?(p[0]=='P'?p[3]:p[0]):'';
+ const whOfTB=(tb,ch)=>Object.keys(WH).find(k=>WH[k].tb==tb&&WH[k].ch==ch);
+ const R=(fn,miss,test,lvl,extra)=>({fn,miss,test:test||'',lvl:lvl||'must',extra:extra||''});
+ const cont=`斷電，萬用表通斷檔：${nmOf(A)} ↔ ${nmOf(B)} 應導通（嗶），且不與其他針腳導通。`;
+ if(g=='PWM'){const tb=cb,k=whOfTB(tb,chan(pb)),w=wh(k);
+  if(/^PWM/.test(pb))return R(`Pico GP 輸出 20 kHz PWM → ${tb} 的 ${pb}，以占空比決定 ${w} 輪轉速。`,`${w} 輪沒有轉速控制：不會轉或失控全速。`,cont);
+  return R(`${pb} 是方向腳：IN1/IN2 的組合決定 ${w} 輪 正轉 / 反轉 / 滑行 / 短路煞車。`,`${w} 輪只能單向、無法煞車；${pb} 與另一支方向腳接反則該輪方向相反（圖上與韌體 config.py 要一致）。`,cont)}
+ if(g=='MOT'){const k=cb,tb=ca,w=wh(k),red=pb=='M+';return R(`${tb} 輸出 → ${w} 馬達${red?'紅線 M+':'白線 M−'}。`,`${w} 輪沒有動力。M+ / M− 對調：只會讓該輪前進時反轉（可在這裡對調修正），不會損壞。`,cont+'（馬達端子勿與車架導通）。')}
+ if(g=='ENC'){const k=ca,w=wh(k);return R(`${w} 編碼器 A 相脈衝 → Pico（量實際轉速：PI 閉環控制、堵轉偵測、里程）。B 相不接。`,`${w} 輪沒有轉速回授：轉速顯示 0、PI 失效，且可能被誤判堵轉而斷電。`,cont+' 另轉動輪子時 A 腳應有 0↔3.3V 變化（示波器/邏輯分析儀；萬用表直流檔會看到電壓在 0~3.3V 間跳動）。')}
+ if(g=='TRG'){const k=cb.slice(1);return R(`Pico 送 10 µs 觸發脈衝給${wh(k)}超音波。`,`${wh(k)}方向量不到距離（顯示 400 cm），該方向避障失效。`,cont)}
+ if(g=='ECH'){if(ca[0]=='S'){const k=ca.slice(1);return R(`${wh(k)}超音波 Echo（5V 準位）→ 分壓器 R1（1 kΩ）。`,`${wh(k)}方向沒有距離讀值。**絕對不要把 Echo 直接接 Pico**（5V 會損壞 GPIO）。`,cont,'must','⚠ 5V 訊號')}
+  const k=ca.slice(1);return R(`分壓後約 3.3 V 的 Echo → Pico GPIO（R1 1 kΩ 與 R2 2 kΩ 的中點）。`,`${wh(k)}方向沒有距離讀值。`,cont+' 通電後超音波正對牆面時，這點電壓 ≤ 3.3 V（量到 5V 代表分壓沒接好，立刻斷電）。')}
+ if(g=='UART'){return pb=='RX'?R('Pico TX（GP20）→ ESP32 RX（GPIO2）：底盤回傳遙測（距離、轉速、旗標、電池…）。','手機看不到任何數據、出現「底盤無回應」；車仍會在 Pico 端依失控保護停車。',cont+' 必須交叉：TX 接 RX。'):R('ESP32 TX（GPIO1）→ Pico RX（GP21）：手機遙控指令傳給底盤。','車子收不到指令，300 ms 後進失控保護，**完全無法開**。',cont+' 必須交叉：TX 接 RX。')}
+ if(g=='I2C'){const sda=/SDA/.test(A+B),sig=sda?'SDA（GPIO41）':'SCL（GPIO42）';
+  if(ca=='ESP')return R(`ESP32 ${sig} 接到 I2C ${sda?'SDA':'SCL'} 匯流（電量計與六軸共用）。`,'電池電量計與六軸都讀不到：不影響行車；手機電量顯示 --、錄製檔的 IMU 欄位留空。',cont,'opt');
+  const dev=cb=='INA'?'INA219 電量計':'LSM6DS3 六軸';return R(`I2C ${sda?'SDA':'SCL'} 匯流 → ${dev}。`,`${dev}讀不到${cb=='INA'?'（電量顯示 --）':'（錄製檔 IMU 欄位留空、分析頁沒有打滑曲線）'}；不影響行車。SDA/SCL 接反則讀不到。`,cont,'opt')}
+ if(g=='SD'){return R(`${nmOf(A)} ↔ microSD（SD_MMC 1-bit）。ESP32-S3 板載插槽已在板上接好，**這裡只是標示，不用焊**。`,'沒有 SD 卡就不能錄製（手機 REC 顯示沒有 SD 卡），其他功能照常。','插卡後手機 REC 按鈕顯示「SD 就緒」即可。','onb')}
+ if(g=='PAS'){
+  if(/^CM/.test(ca))return R(`0.1 µF 陶瓷電容並在 ${wh(ca.slice(2))} 馬達端子（${pa=='1'?'M+':'M−'} 側）：吸收電刷火花雜訊。`,'功能仍正常，但編碼器計數與超音波可能被雜訊干擾（轉速亂跳、距離偶爾亂）。','兩端各焊在馬達的 M+ / M− 焊點（越近越好）；通斷檔應與馬達端子導通。','rec');
+  if(/^RD/.test(ca))return R(`10 kΩ 下拉電阻：${nmOf(B)} 在 Pico 重啟或未開機時保持低電位。`,'平常正常；只是 Pico 重啟/開機瞬間，馬達可能短暫亂轉。','電阻一端接該控制線，另一端接 GND：量電阻約 10 kΩ。','rec');
+  if(/^RE/.test(ca))return R(`4.7 kΩ 上拉電阻：${wh(ca.slice(2))} 編碼器 A 線 → 3V3（Pico 已開內部上拉，通常不用加）。`,'沒有也行；只有 A 線邊緣圓鈍、轉速亂跳時才需要。','量電阻約 4.7 kΩ（A 線↔3V3）。','opt');
+  if(/^RP/.test(ca))return R(`4.7 kΩ I2C ${/SDA/.test(ca)?'SDA':'SCL'} 上拉電阻（選用）。`,'多數 INA219 / IMU 模組板上已有上拉，不用加；裝置掃不到或線很長才加。並太多會讓上拉過強。','量電阻約 4.7 kΩ。','opt')}
+ if(g=='VM'||g=='V5'||g=='V33'||g=='GND'){
+  const V={VM:'電池電壓（9~12.6 V）',V5:'5.0 V（±0.25）',V33:'3.3 V（±0.1）'}[g];
+  const pw=V?`通電後量${nmOf(B)}對 GND：應為 ${V}；斷電時 ${g=='VM'?'VM':g=='V5'?'5V':'3V3'} 對 GND 電阻不可接近 0 Ω（短路）。`:'';
+  if(A=='BATT.+')return R('電池正極（XT60）→ 總開關 / 保險絲入口。','整車沒有電。**電池極性接反會瞬間燒毀驅動板與 Pico**——焊之前用萬用表確認紅線 = +。',cont+' '+pw,'must','⚠ 極性');
+  if(A=='SWF.OUT')return R('開關 + 保險絲（5~7.5 A）之後的 VM 主幹（約 12 V）。','整車馬達電源斷開；沒有保險絲時短路可能起火，**一定要裝**。',pw,'must','⚠ 保險絲');
+  if(/^VM\.TB/.test(A))return R(`VM → ${cb} 馬達電源（VM 腳），供 ${cb=='TB1'?'左側':'右側'}兩顆馬達。`,`${cb=='TB1'?'左':'右'}側兩顆馬達完全沒有動力（邏輯仍正常，容易誤以為驅動板壞了）。`,pw);
+  if(A=='VM.INA')return R('電池正極 → INA219 VIN−，只量電壓（VIN+ 不接、馬達電流不要串過模組）。','電量顯示 --，不影響行車。VIN+ 若串入馬達電流，3.2 A 上限會燒模組。',pw,'opt','⚠ 勿串負載');
+  if(/^VM\.CT/.test(A))return R(`1000 µF/25 V 電解電容「+」→ VM（靠近 ${ca=='VM'?cb.slice(2):''} 驅動板）。`,'啟動/煞車時 VM 抖動，可能干擾驅動板或讓 Pico 重啟；電容缺少仍可動作。**極性接反會爆**（長腳 +）。',pw,'rec','⚠ 極性');
+  if(A=='PB.5V')return R('行動電源 5V 輸出 → 5V 匯流。','ESP32 與超音波沒電；Pico 也不會通電（Pico 由 5V 經二極體供電）。',pw);
+  if(A=='V5.ESP')return R('5V 匯流 → ESP32 5V 腳。','ESP32 不開機：沒有 Wi-Fi、手機連不上。',pw);
+  if(A=='V5.D')return R('5V 匯流 → 1N5819 陽極（A）。','Pico 沒電。',pw+' 二極體有方向：銀色環那端是陰極 K，接 Pico VSYS。');
+  if(A=='D1.K')return R('二極體陰極 → Pico VSYS（**不接 VBUS**）：防電流倒灌，讓 Pico 與 USB 同時接也安全。','Pico 沒電、車不會動。接 VBUS 則 USB 供電時會互相倒灌。',pw,'must','⚠ 接 VSYS');
+  if(/^V5\.S/.test(A))return R(`5V → ${wh(cb.slice(1))}超音波 VCC。`,`${wh(cb.slice(1))}超音波不工作（距離 400 cm）。HC-SR04 需 5V；3.3V 可能量不準。`,pw);
+  if(A=='PICO.3V3')return R('Pico 3V3(OUT) → 3V3 匯流：供編碼器與驅動板邏輯。','編碼器與驅動板邏輯沒有 3.3V：輪子不轉、沒有回授。',pw);
+  if(/^V33\.E/.test(A))return R(`3.3 V → ${wh(cb)}編碼器 VCC（藍線）。`,`${wh(cb)}輪沒有轉速回授（可能被誤判堵轉）。編碼器請用 3.3V，5V 會讓輸出超過 Pico 可承受電壓。`,pw,'must','⚠ 3.3V');
+  if(/^V33\.TB.V$/.test(A))return R(`3.3 V → ${cb} VCC（邏輯電源）。`,`${cb=='TB1'?'左':'右'}側驅動板不動作。`,pw);
+  if(/^V33\.TB.S$/.test(A))return R(`3.3 V → ${cb} STBY（拉高 = 啟用輸出）。`,`${cb=='TB1'?'左':'右'}側驅動板永遠待機：兩顆馬達都不轉，且量不出任何輸出。`,pw);
+  if(A=='ESP.3V3')return R('ESP32 自己的 3V3 → ESP 3V3 匯流（INA219 / 六軸專用；與 Pico 的 3V3 分開，不要並聯兩顆穩壓）。','電量計與六軸沒電：不影響行車。',pw,'opt');
+  if(/^V33E\.INA/.test(A))return R('ESP 3V3 → INA219 VCC。','電量計沒電，電量顯示 --；不影響行車。',pw,'opt');
+  if(/^V33E\.IMU/.test(A))return R('ESP 3V3 → LSM6DS3 VCC（3.3 V，不要接 5V）。','六軸沒電、掃不到：錄製檔 IMU 欄位留空；不影響行車。',pw,'opt');
+  if(/^V33\.RE/.test(B)||/^V33E\.RP/.test(B))return R('上拉電阻另一端 → 3.3 V。','見該電阻說明（選用）。',pw,'opt');
+  if(g=='GND'){
+   if(A=='BATT.-')return R('電池負極 → GND 匯流（整車共地參考）。','整車沒有電流回路，一切不動作。',cont,'must');
+   if(/^PB\.GND/.test(A))return R('行動電源 GND → 共地。','ESP32 / 超音波沒有回路；與電池地沒共地則 Pico↔ESP32 UART 沒有參考，通訊失敗。',cont);
+   if(/^TB.\.GND/.test(A))return R(`${ca} GND → 共地（馬達電流與邏輯的回路）。`,`${ca=='TB1'?'左':'右'}側驅動板不工作或亂動作。**馬達電流回路要用粗線**。`,cont);
+   if(A=='PICO.GND3')return R('Pico GND → 共地。','所有 3.3V 訊號沒有共同參考，通訊與感測全部失常。',cont);
+   if(A=='ESP.GND')return R('ESP32 GND → 共地。','ESP32 與其他板沒有共同參考：UART 失敗、手機無法控制。',cont);
+   if(/^S.{2}\.GND/.test(A))return R(`${wh(ca.slice(1))}超音波 GND → 共地。`,`${wh(ca.slice(1))}超音波不工作。`,cont);
+   if(/^D.{2}\.GND/.test(A))return R(`${wh(ca.slice(1))}Echo 分壓 R2（2 kΩ = 兩顆 1 kΩ 串聯）下端 → GND，與 R1 分出 3.3 V。`,`**沒有 R2 就等於 Echo 5V 只經 1 kΩ 直接進 Pico，GPIO 會被過壓損壞。**`,cont+' R1 與 R2 的中點量到 ≤ 3.3 V 才可接 Pico。','must','⚠ 保護 GPIO');
+   if(/^(FL|FR|RL|RR)\.GND/.test(A))return R(`${wh(ca)}編碼器 GND（黑線）→ 共地。`,`${wh(ca)}輪沒有轉速回授。`,cont);
+   if(/^INA\.GND/.test(A))return R('INA219 GND → 共地。','電量計不工作，不影響行車。',cont,'opt');
+   if(/^IMU\.GND/.test(A))return R('LSM6DS3 GND → 共地。','六軸不工作，不影響行車。',cont,'opt');
+   if(A=='IMU.SA0')return R('LSM6DS3 SA0 → GND（I2C 位址 0x6A；接 3V3 則 0x6B，韌體兩個都找）。','懸空可能讀不穩；兩種位址都能用，不影響行車。',cont,'opt');
+   if(/^CT/.test(A))return R('1000 µF 電容「−」→ GND（長腳 +、短腳/白色條紋那端 −）。','見電容說明（建議）；極性接反會爆。',cont,'rec','⚠ 極性');
+   if(/^RD/.test(A))return R('10 kΩ 下拉電阻的共地端。','重啟瞬間馬達可能亂轉；平常不影響。',cont,'rec')}
+ }
+ return R(`${nmOf(A)} → ${nmOf(B)}（${G[g][2]}）。`,'此線缺少時，相關功能不工作。',cont);
+}
+const LVL={must:['必要','#d64545'],rec:['建議','#c98a00'],opt:['選用','#5a7bd6'],onb:['板載免焊','#7a8599']};
+W.forEach(o=>{try{o.D=describe(o)||{fn:'',miss:'',test:'',lvl:'must',extra:''}}catch(e){o.D={fn:o.a+' → '+o.b,miss:'',test:'',lvl:'must',extra:''}}});
+/* ---- 進度資料 (自動存瀏覽器 + 可匯出檔案) ---- */
+const PKEY='rc4wd_wiring_progress_v1';let PR={};
+try{PR=JSON.parse(localStorage.getItem(PKEY)||'{}')||{}}catch(e){PR={}}
+const stOf=o=>PR[o.k]||(PR[o.k]={d:0,t:0,s:0,n:''});
+const hasSt=o=>PR[o.k];
+function saveProg(){try{const c={};for(const k in PR){const v=PR[k];if(v.d||v.t||v.s||v.n)c[k]=v}localStorage.setItem(PKEY,JSON.stringify(c))}catch(e){}}
+let FIL='all',HIDE=false;
+const counted=o=>o.D.lvl!='onb';
+const isDone=o=>{const s=hasSt(o);return !!(s&&(s.d||s.s))};
+function passF(o){const s=hasSt(o)||{};
+ if(HIDE&&counted(o)&&(s.d||s.s))return false;
+ switch(FIL){case'todo':return counted(o)&&!s.d&&!s.s;case'notest':return !!s.d&&!s.t;case'skip':return !!s.s;case'must':return o.D.lvl=='must';case'opt':return o.D.lvl=='opt'||o.D.lvl=='rec';case'note':return !!s.n;default:return true}}
+function renderProgress(){
+ const L=W.filter(counted),n=L.length,d=L.filter(o=>hasSt(o)&&hasSt(o).d).length,t=L.filter(o=>hasSt(o)&&hasSt(o).t).length,s=L.filter(o=>hasSt(o)&&hasSt(o).s).length,fin=L.filter(isDone).length;
+ const must=L.filter(o=>o.D.lvl=='must'),mf=must.filter(isDone).length;
+ const pc=n?Math.round(fin/n*100):0;
+ document.getElementById('pbar').style.width=pc+'%';
+ document.getElementById('pnum').innerHTML=`<b>${fin}/${n}</b> 條完成（${pc}%）<small> ・焊接 ${d} ・測通 ${t} ・略過 ${s}</small><br><small>必要的線 ${mf}/${must.length} ${mf==must.length?'✅ 核心全部完成':''}</small>`;
+ document.getElementById('pgrp').innerHTML=Object.keys(G).map(k=>{const a=L.filter(o=>o.g==k);if(!a.length)return'';const f=a.filter(isDone).length;return`<span class="pg" title="${G[k][2]}"><i style="background:${G[k][0]}"></i>${k} ${f}/${a.length}</span>`}).join('');
+}
+function renderDetail(){
+ const el=document.getElementById('det');
+ if(!sel||sel.t!='w'){if(sel&&sel.t=='c'){const a=W.filter(o=>o.o.ca==sel.id||o.o.cb==sel.id),f=a.filter(isDone).length;el.style.display='block';el.innerHTML=`<b>${CM[sel.id].name}</b>：共 ${a.length} 條線，完成 ${f} 條。<br><small class="mu">點下方的線可看功能、缺少後果並勾選。</small>`}else el.style.display='none';return}
+ const o=sel.w,s=stOf(o),D=o.D,L=LVL[D.lvl];el.style.display='block';
+ el.innerHTML=`<div class="dh"><span class="lv" style="background:${L[1]}">${L[0]}</span><b>#${o.i}</b> ${G[o.g][2]}</div>
+ <div class="dt">${nmOf(o.a)} <span>→</span> ${nmOf(o.b)}</div>
+ ${D.extra?`<div class="warn">${D.extra}</div>`:''}
+ <div class="dk">功能</div><div>${D.fn}${o.n?`<br><small class="mu">圖上備註：${o.n}</small>`:''}</div>
+ <div class="dk">缺少 / 接錯會怎樣</div><div>${D.miss}</div>
+ <div class="dk">焊好後怎麼測</div><div>${D.test}</div>
+ <div class="chk"><label><input type="checkbox" id="ckD" ${s.d?'checked':''}> 已焊接</label><label><input type="checkbox" id="ckT" ${s.t?'checked':''}> 已測通</label><label><input type="checkbox" id="ckS" ${s.s?'checked':''}> 不裝 / 略過</label></div>
+ <textarea id="ckN" rows="2" placeholder="備註（例如：線長、顏色、遇到的問題…）">${(s.n||'').replace(/</g,'&lt;')}</textarea>`;
+ const upd=()=>{saveProg();renderProgress();paintRows()};
+ document.getElementById('ckD').onchange=e=>{s.d=e.target.checked?1:0;if(!s.d)s.t=0,document.getElementById('ckT').checked=false;if(s.d)s.s=0,document.getElementById('ckS').checked=false;upd()};
+ document.getElementById('ckT').onchange=e=>{s.t=e.target.checked?1:0;if(s.t){s.d=1;s.s=0;document.getElementById('ckD').checked=true;document.getElementById('ckS').checked=false}upd()};
+ document.getElementById('ckS').onchange=e=>{s.s=e.target.checked?1:0;if(s.s){s.d=0;s.t=0;document.getElementById('ckD').checked=false;document.getElementById('ckT').checked=false}upd()};
+ document.getElementById('ckN').oninput=e=>{s.n=e.target.value;saveProg();paintRows()};
+}
+function badge(o){const s=hasSt(o)||{};return(s.t?'<em class="b t">測</em>':s.d?'<em class="b d">焊</em>':s.s?'<em class="b s">略</em>':'')+(s.n?'<em class="b n">✎</em>':'')}
+function paintRows(){document.querySelectorAll('#list .r').forEach(r=>{const o=WR[+r.dataset.i],s=hasSt(o)||{};r.classList.toggle('dn',!!(s.d||s.s));r.querySelector('.bd').innerHTML=badge(o);const c=r.querySelector('.ck');if(c)c.checked=!!s.d})}
+/* 匯出 / 匯入 */
+function download(name,text,type){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500)}
+const stamp=()=>new Date().toISOString().slice(0,16).replace(/[-:T]/g,'');
+function exportJSON(){const items={},wires=[];W.forEach(o=>{const s=hasSt(o);if(s&&(s.d||s.t||s.s||s.n))items[o.k]={d:s.d,t:s.t,s:s.s,n:s.n};
+  wires.push({no:o.i,key:o.k,group:o.g,from:nmOf(o.a),to:nmOf(o.b),level:LVL[o.D.lvl][0],function:o.D.fn,if_missing:o.D.miss,test:o.D.test,soldered:s&&s.d?1:0,tested:s&&s.t?1:0,skipped:s&&s.s?1:0,note:(s&&s.n)||''})});
+ const L=W.filter(counted);
+ download('wiring-progress-'+stamp()+'.json',JSON.stringify({app:'rc4wd-wiring-progress',ver:1,exported:new Date().toISOString(),summary:{total:L.length,finished:L.filter(isDone).length,soldered:L.filter(o=>hasSt(o)&&hasSt(o).d).length,tested:L.filter(o=>hasSt(o)&&hasSt(o).t).length},items,wires},null,1),'application/json');pmsg('已匯出進度檔。下次按「匯入進度」選這個檔案就能還原。')}
+function exportCSV(){const q=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
+ const rows=[['編號','線組','起點','終點','必要性','功能','缺少/接錯會怎樣','焊後怎麼測','已焊接','已測通','略過','備註']];
+ W.forEach(o=>{const s=hasSt(o)||{};rows.push([o.i,G[o.g][2],nmOf(o.a),nmOf(o.b),LVL[o.D.lvl][0],o.D.fn,o.D.miss,o.D.test,s.d?'V':'',s.t?'V':'',s.s?'V':'',s.n||''])});
+ download('wiring-checklist-'+stamp()+'.csv','﻿'+rows.map(r=>r.map(q).join(',')).join('\r\n'),'text/csv');pmsg('已匯出 CSV 清單（可用 Excel / 試算表開啟、列印）。')}
+function importJSON(file){const fr=new FileReader();fr.onload=()=>{try{const j=JSON.parse(fr.result);let it=j.items;if(!it&&Array.isArray(j.wires)){it={};j.wires.forEach(w=>{if(w.soldered||w.tested||w.skipped||w.note)it[w.key]={d:w.soldered?1:0,t:w.tested?1:0,s:w.skipped?1:0,n:w.note||''}})}
+  if(!it||typeof it!='object')throw Error('不是進度檔');const keys=new Set(W.map(o=>o.k));let ok=0,miss=[];PR={};
+  for(const k in it){if(keys.has(k)){const v=it[k];PR[k]={d:v.d?1:0,t:v.t?1:0,s:v.s?1:0,n:String(v.n||'')};ok++}else miss.push(k)}
+  saveProg();refresh();pmsg(`已還原 ${ok} 條線的進度。`+(miss.length?`另有 ${miss.length} 條在目前的接線圖找不到（接線圖更新過？已忽略）：${miss.slice(0,3).join('、')}${miss.length>3?'…':''}`:''))}catch(e){pmsg('匯入失敗：'+e.message,1)}};fr.readAsText(file)}
+function pmsg(t,bad){const e=document.getElementById('pmsg');e.textContent=t;e.style.color=bad?'#d64545':'var(--mu)'}
+document.getElementById('bExpJ').onclick=exportJSON;document.getElementById('bExpC').onclick=exportCSV;
+document.getElementById('bImp').onclick=()=>document.getElementById('fImp').click();
+document.getElementById('fImp').onchange=e=>{const f=e.target.files[0];e.target.value='';if(f)importJSON(f)};
+document.getElementById('bRst').onclick=()=>{if(confirm('清除全部施工進度與備註？（建議先匯出）')){PR={};saveProg();refresh();pmsg('已清除。')}};
+document.getElementById('selF').onchange=e=>{FIL=e.target.value;refresh()};
+document.getElementById('ckH').onchange=e=>{HIDE=e.target.checked;refresh()};
+
+const PRE={'訊號':['PWM','MOT','ENC','TRG','ECH','UART','I2C','SD'],'電源':['VM','V5','V33','GND'],'馬達':['PWM','MOT'],'感測':['ENC','TRG','ECH'],'通訊':['UART','I2C','SD'],'電阻電容':['PAS','VM','V33','GND','MOT','PWM','ENC','ECH'],'全部':Object.keys(G)};
+function setPre(n){for(const k in G)G[k][3]=PRE[n].includes(k)?1:0;sel=null;document.querySelectorAll('#grp input').forEach(i=>i.checked=!!G[i.dataset.g][3]);document.querySelectorAll('#pre button').forEach(b=>b.classList.toggle('on',b.textContent==n));refresh()}
+document.getElementById('pre').innerHTML=Object.keys(PRE).map(n=>`<button>${n}</button>`).join('');
+document.getElementById('pre').onclick=e=>{if(e.target.tagName=='BUTTON')setPre(e.target.textContent)};
+const ptr=new Map(),ray=new THREE.Raycaster(),tip=document.getElementById('tip');let moved=0;
+function hit(e){const r=cv.getBoundingClientRect();ray.setFromCamera(new THREE.Vector2((e.clientX-r.left)/r.width*2-1,-((e.clientY-r.top)/r.height)*2+1),cam);
+ return ray.intersectObjects(wm.filter(m=>m.visible&&m.material.opacity>.5).concat(picks),false)[0]}
+function pan(dx,dy){const s=dist*.0016;tg.x+=(-Math.cos(az)*dx-Math.sin(az)*dy)*s;tg.z+=(Math.sin(az)*dx-Math.cos(az)*dy)*s}
+cv.addEventListener('pointerdown',e=>{anim=null;cv.setPointerCapture(e.pointerId);ptr.set(e.pointerId,{x:e.clientX,y:e.clientY});moved=0});
+cv.addEventListener('pointermove',e=>{const p=ptr.get(e.pointerId);
+ if(!p){const h=hit(e);if(h&&h.object.userData.w){const o=h.object.userData.w;tip.style.display='block';tip.style.left=e.offsetX+14+'px';tip.style.top=e.offsetY+14+'px';tip.innerHTML=`<b>${G[o.g][2]}</b><br>${nmOf(o.a)} → ${nmOf(o.b)}${o.n?'<br>'+o.n:''}`}else tip.style.display='none';return}
+ const dx=e.clientX-p.x,dy=e.clientY-p.y,q=[...ptr].find(([k])=>k!=e.pointerId);
+ if(q){const d0=Math.hypot(p.x-q[1].x,p.y-q[1].y),d1=Math.hypot(e.clientX-q[1].x,e.clientY-q[1].y);dist=clamp(dist*d0/d1,12,320);pan(dx/2,dy/2)}
+ else if(e.buttons&2||e.shiftKey||e.ctrlKey||e.metaKey)pan(dx,dy);else{az-=dx*.006;el=clamp(el+dy*.006,.08,1.56)}
+ p.x=e.clientX;p.y=e.clientY;moved+=Math.abs(dx)+Math.abs(dy);setCam()});
+cv.addEventListener('pointerup',e=>{if(ptr.size==1&&moved<5){const h=hit(e);sel=h?(h.object.userData.w?{t:'w',w:h.object.userData.w}:{t:'c',id:h.object.userData.cid}):null;refresh();if(sel&&sel.t=='c'){const c=CM[sel.id];anim={t:new THREE.Vector3(c.x,0,c.z),d:Math.min(dist,75)}}}ptr.delete(e.pointerId)});
+cv.addEventListener('pointercancel',e=>ptr.delete(e.pointerId));
+let anim=null;
+function gp(e){const r=cv.getBoundingClientRect();cam.updateMatrixWorld();ray.setFromCamera(new THREE.Vector2((e.clientX-r.left)/r.width*2-1,-((e.clientY-r.top)/r.height)*2+1),cam);const t=-ray.ray.origin.y/ray.ray.direction.y;return t>0?ray.ray.origin.clone().addScaledVector(ray.ray.direction,t):null}
+cv.addEventListener('wheel',e=>{e.preventDefault();anim=null;const f=1+clamp(e.deltaY,-120,120)*.0012,nd=clamp(dist*f,12,320),p=gp(e);if(p){const k=1-nd/dist;tg.x+=(p.x-tg.x)*k;tg.z+=(p.z-tg.z)*k}dist=nd;setCam()},{passive:false});
+cv.addEventListener('dblclick',e=>{const p=gp(e);if(p)anim={t:new THREE.Vector3(p.x,0,p.z),d:35}});
+cv.addEventListener('contextmenu',e=>e.preventDefault());
+addEventListener('keydown',e=>{if(e.code=='Space'){e.preventDefault();if(document.activeElement&&document.activeElement.blur)document.activeElement.blur();anim={t:new THREE.Vector3(0,0,0),d:135}}});
+addEventListener('keyup',e=>{if(e.code=='Space')e.preventDefault()});
+new ResizeObserver(()=>{const r=document.getElementById('stage').getBoundingClientRect();R.setSize(r.width,r.height,false);cam.aspect=r.width/r.height;cam.updateProjectionMatrix()}).observe(document.getElementById('stage'));
+setCam();setPre('訊號');(function loop(){if(anim){tg.lerp(anim.t,.18);dist+=(anim.d-dist)*.18;setCam();if(tg.distanceTo(anim.t)<.1&&Math.abs(anim.d-dist)<.3)anim=null}R.render(S,cam);requestAnimationFrame(loop)})();
+
+/* ================= 零件與模組清單 (獨立分頁；採購勾選，自動存瀏覽器，可匯出/匯入) ================= */
+const BKEY='rc4wd_bom_v1';let BS={};try{BS=JSON.parse(localStorage.getItem(BKEY)||'{}')||{}}catch(e){BS={}}
+const BL={must:['必買','#d64545'],rec:['建議','#c98a00'],opt:['選用','#5a7bd6'],tool:['工具','#7a8599']};
+const BOM=[
+['主要模組',[
+ ['pico','Raspberry Pi Pico（RP2040）',1,'must','底盤控制器；腳位全用完，需排針'],
+ ['esp','ESP32-S3 開發板（含 OV2640 鏡頭、microSD 插槽）',1,'must','Wi-Fi／網頁／鏡頭／錄製；SD 腳位須為 GPIO38/39/40 (1-bit)，例如 ESP32-S3-CAM 類'],
+ ['tb','TB6612FNG 馬達驅動板',2,'must','左側一塊、右側一塊，各管 2 輪'],
+ ['mot','GA25 減速馬達（帶編碼器）',4,'must','6 線：M+ M− VCC GND A B；B 相不接。車體若已有馬達先確認型號'],
+ ['son','HC-SR04 超音波模組',4,'must','車頭 2、車尾 2'],
+ ['sd','microSD 卡',1,'must','16–32GB、FAT32、Class 10 以上'],
+ ['ina','INA219 電量計模組',1,'rec','手機顯示電池電量；只量電壓，不串聯馬達電流'],
+ ['imu','LSM6DS3 六軸模組（SA0 接 GND = 0x6A）',1,'opt','錄製分析用；沒裝韌體也能正常運作']]],
+['電源',[
+ ['bat','3S 鋰電池（11.1V，XT60）',1,'must','馬達電源'],
+ ['pb','5V 行動電源',1,'must','供 Pico / ESP32 / 超音波'],
+ ['xt60','XT60 公母頭',1,'must','一組，接電池'],
+ ['sw','總開關',1,'must','裝在電池正極後'],
+ ['fuse','保險絲 5–7.5A 與座',1,'must','一定要裝，短路保護'],
+ ['d','1N5819 蕭特基二極體',1,'must','1 顆（接線圖 D1）'],
+ ['cap1000','1000µF / 25V 電解電容',2,'must','每塊驅動板 VM 旁一顆，注意極性（長腳 +）'],
+ ['cap01','0.1µF 陶瓷電容',4,'must','每顆馬達端子間一顆，越近馬達越好']]],
+['電阻（1/4W）',[
+ ['r1k','1kΩ 電阻',12,'must','4 顆 Echo 分壓：每顆 R1 用 1 顆、R2 用 2 顆串聯'],
+ ['r10k','10kΩ 電阻',12,'must','每輪 3 顆下拉（PWM / IN1 / IN2）'],
+ ['r47','4.7kΩ 電阻',6,'opt','編碼器上拉 4 + I2C 上拉 2；多數情況不用裝']]],
+['配線與耗材',[
+ ['wp','粗電線 18–20AWG（紅／黑）',1,'must','電源主幹，數公尺'],
+ ['ws','細電線 24–26AWG（多色）',1,'must','訊號線'],
+ ['dup','杜邦線 / 排針 / 洞洞板或轉接板',1,'must','連接用，建議多買'],
+ ['hs','熱縮套管、焊錫、助焊劑',1,'must',''],
+ ['usb','USB 資料線（Micro-USB 給 Pico、Type-C 給 ESP32-S3）',2,'must','燒錄用，要有資料傳輸功能']]],
+['工具',[
+ ['dmm','萬用表',1,'tool','焊接前量電池極性、量電壓、查短路'],
+ ['iron','電烙鐵與焊台',1,'tool','']]]];
+
+const BPIN={pico:'PICO',esp:'ESP',tb:'TB1',mot:'FL',son:'SFL',sd:'SD',ina:'INA',imu:'IMU',bat:'BATT',pb:'PB',sw:'SWF',d:'D1'};
+const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function pinsOf(id){const c=C.find(x=>x.id===BPIN[id]);if(!c||!c.pins)return null;const out=[];for(const k of Object.keys(c.pins))for(const p of c.pins[k]){const l=p.includes('|')?p.split('|')[1]:p;out.push(l)}return out}
+const bAll=()=>BOM.flatMap(g=>g[1].map(i=>({g:g[0],id:i[0],name:i[1],q:i[2],lv:i[3],n:i[4]})));
+const bSave=()=>{try{const c={};for(const k in BS){const v=BS[k];if(v.b||v.s||v.n)c[k]=v}localStorage.setItem(BKEY,JSON.stringify(c))}catch(e){}};
+let BF='all';
+function bRender(){
+ const all=bAll(),got=all.filter(i=>BS[i.id]&&BS[i.id].b).length,must=all.filter(i=>i.lv==='must'),mg=must.filter(i=>BS[i.id]&&BS[i.id].b).length;
+ document.getElementById('bsum').textContent=`已備齊 ${got}/${all.length} 項；必買 ${mg}/${must.length} 項`;
+ document.querySelector('#bbar i').style.width=(100*got/all.length)+'%';
+ let h='';for(const g of BOM){const L=g[1].filter(it=>{const st=BS[it[0]]||{};return BF==='all'||(BF==='must'&&it[3]==='must')||(BF==='todo'&&!st.b)});if(!L.length)continue;
+  h+=`<h3>${g[0]}</h3><div class="pgrid">`;
+  for(const it of L){const st=BS[it[0]]||{},pins=pinsOf(it[0]);
+   const chips=pins?`<div class="pins">${pins.map(p=>`<span class="${/^(VM|VCC|5V|3V3|VBUS|VSYS|VIN|\+|3V3_EN|ADC_VREF)/.test(p)?'pw':/^GND|^-|^−/.test(p)?'gd':''}">${esc(p)}</span>`).join('')}</div>`:'';
+   h+=`<div class="pc${st.b?' dn':''}"><div class="t"><input type="checkbox" data-b="${it[0]}" ${st.b?'checked':''} title="已買"><b>${esc(it[1])}</b><span class="q">×${it[2]}</span></div><span class="lv" style="background:${BL[it[3]][1]}">${BL[it[3]][0]}</span>${it[4]?`<div class="d">${esc(it[4])}</div>`:''}${chips}<input class="bn" data-n="${it[0]}" placeholder="備註（型號 / 店家 / 價格）" value="${esc(st.n||'')}"></div>`}
+  h+='</div>'}
+ document.getElementById('blist').innerHTML=h||'<div class="mu">沒有符合的項目</div>'}
+document.getElementById('blist').addEventListener('change',e=>{const t=e.target;if(t.dataset.b){(BS[t.dataset.b]=BS[t.dataset.b]||{}).b=t.checked?1:0;bSave();bRender()}});
+document.getElementById('blist').addEventListener('input',e=>{const t=e.target;if(t.dataset.n){(BS[t.dataset.n]=BS[t.dataset.n]||{}).n=t.value;bSave()}});
+document.getElementById('bSel').onchange=e=>{BF=e.target.value;bRender()};
+document.getElementById('bClr').onclick=()=>{if(confirm('清除全部勾選與備註？（建議先匯出）')){BS={};bSave();bRender()}};
+document.getElementById('bCsv').onclick=()=>{const q=v=>'"'+String(v??'').replace(/"/g,'""')+'"';const rows=[['分類','品名','數量','必要性','說明','已買','備註']];
+ bAll().forEach(i=>{const s=BS[i.id]||{};rows.push([i.g,i.name,i.q,BL[i.lv][0],i.n,s.b?'V':'',s.n||''])});
+ download('rc4wd-bom-'+stamp()+'.csv','﻿'+rows.map(r=>r.map(q).join(',')).join('\r\n'),'text/csv')};
+document.getElementById('bJson').onclick=()=>{const items={};for(const k in BS){const v=BS[k];if(v.b||v.s||v.n)items[k]={b:v.b?1:0,n:v.n||''}}
+ download('rc4wd-bom-'+stamp()+'.json',JSON.stringify({app:'rc4wd-bom',ver:1,exported:new Date().toISOString(),items},null,1),'application/json')};
+document.getElementById('bImpB').onclick=()=>document.getElementById('fBom').click();
+document.getElementById('fBom').onchange=e=>{const f=e.target.files[0];e.target.value='';if(!f)return;const fr=new FileReader();fr.onload=()=>{try{const j=JSON.parse(fr.result);if(j.app!=='rc4wd-bom'||!j.items)throw Error('不是零件清單檔');
+ const ids=new Set(bAll().map(i=>i.id));BS={};for(const k in j.items)if(ids.has(k))BS[k]={b:j.items[k].b?1:0,n:String(j.items[k].n||'')};bSave();bRender()}catch(err){alert('匯入失敗：'+err.message)}};fr.readAsText(f)};
+bRender();
+
+/* ---- 分頁切換 + 右側可拖曳寬度 ---- */
+function showTab(p){document.body.classList.toggle('pv',p);document.getElementById('tW').classList.toggle('on',!p);document.getElementById('tP').classList.toggle('on',p);try{localStorage.setItem('rc4wd_tab',p?'p':'w')}catch(e){}if(p)bRender()}
+document.getElementById('tW').onclick=()=>showTab(false);document.getElementById('tP').onclick=()=>showTab(true);
+(function(){const rz=document.getElementById('rz'),root=document.documentElement;let w=0;
+ const setW=v=>{w=Math.max(230,Math.min(innerWidth*0.75,v));root.style.setProperty('--aw',w+'px')};
+ try{const v=+localStorage.getItem('rc4wd_aside_w');if(v)setW(v)}catch(e){}
+ rz.addEventListener('pointerdown',e=>{rz.setPointerCapture(e.pointerId);rz.classList.add('on');document.body.classList.add('drag');
+  const mv=ev=>setW(innerWidth-ev.clientX-3);
+  const up=()=>{rz.classList.remove('on');document.body.classList.remove('drag');rz.removeEventListener('pointermove',mv);rz.removeEventListener('pointerup',up);rz.removeEventListener('pointercancel',up);try{localStorage.setItem('rc4wd_aside_w',String(Math.round(w)))}catch(e){}};
+  rz.addEventListener('pointermove',mv);rz.addEventListener('pointerup',up);rz.addEventListener('pointercancel',up)});
+ rz.addEventListener('dblclick',()=>{setW(310);try{localStorage.removeItem('rc4wd_aside_w')}catch(e){}});
+})();
+try{if(localStorage.getItem('rc4wd_tab')==='p')showTab(true)}catch(e){}
+</script></body></html>
